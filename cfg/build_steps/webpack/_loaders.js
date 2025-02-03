@@ -10,7 +10,7 @@ const chalk = require('chalk');
 const { timingCounterStart, timingCounterStop } = require('./_timing');
 const { rwsRuntimeHelper, rwsPath } = require('@rws-framework/console');
 
-function getRWSLoaders(packageDir, executionDir, tsConfig, entrypoint) {
+function getRWSLoaders(packageDir, executionDir, tsConfig, appRootDir, entrypoint) {
   const scssLoader = path.join(packageDir, 'builder/webpack/loaders/rws_fast_scss_loader.js');
   const tsLoader = path.join(packageDir, 'builder/webpack/loaders/rws_fast_ts_loader.js');
   const htmlLoader = path.join(packageDir, 'builder/webpack/loaders/rws_fast_html_loader.js');
@@ -44,7 +44,8 @@ function getRWSLoaders(packageDir, executionDir, tsConfig, entrypoint) {
         {
           loader: tsLoader,
           options: {
-            rwsWorkspaceDir: executionDir
+            rwsWorkspaceDir: executionDir,
+            appRootDir
           }
         }
       ],
@@ -180,7 +181,7 @@ function extractRWSViewArgs(content, noReplace = false) {
   }
 }
 
-async function getStyles(filePath, rwsWorkspaceDir, addDependency, templateExists, stylesPath = null, isDev = false) {
+async function getStyles(filePath, rwsWorkspaceDir, appRootDir, addDependency, templateExists, stylesPath = null, isDev = false) {
   if(!stylesPath){
     stylesPath = 'styles/layout.scss';
   }
@@ -191,7 +192,7 @@ async function getStyles(filePath, rwsWorkspaceDir, addDependency, templateExist
   if (fs.existsSync(stylesFilePath)) {  
     const scsscontent = fs.readFileSync(stylesFilePath, 'utf-8');
     timingCounterStart();
-    const plugin = new RWSCssPlugin({ rwsWorkspaceDir });
+    const plugin = new RWSCssPlugin({ rwsWorkspaceDir, appRootDir });
     const codeData = await plugin.compileScssCode(scsscontent, path.join(path.dirname(filePath), 'styles'), null, filePath, !isDev);
     const elapsed = timingCounterStop();
     let currentTimingList = rwsRuntimeHelper.getRWSVar('_timer_css');

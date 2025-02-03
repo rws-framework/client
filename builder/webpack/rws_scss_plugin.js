@@ -16,10 +16,11 @@ class RWSScssPlugin {
   rwsWorkspaceDir = null;
 
   constructor(params = {
+    appRootDir: null,
     rwsWorkspaceDir: null,
     autoCompile: []
   }) {
-    this.node_modules_dir = (fileDir) => path.relative(fileDir, _tools.findRootWorkspacePath(process.cwd() + '/node_modules'))
+    this.node_modules_dir = (fileDir) => path.relative(fileDir, path.join(this.getRWSRootDir(), '/node_modules'))
     _scss_import = _scss_import_builder(this);    
     _scss_fs = _scss_fs_builder(this);
     _scss_compiler = _scss_compiler_builder(this);
@@ -29,6 +30,7 @@ class RWSScssPlugin {
     }
 
     this.rwsWorkspaceDir = params.rwsWorkspaceDir;
+    this.appRootDir = params.appRootDir;
 
     if (!!params.autoCompile && params.autoCompile.length > 0) {
       this.autoCompile = params.autoCompile;
@@ -47,16 +49,16 @@ class RWSScssPlugin {
   }
 
   async compileFile(scssPath) {    
-    scssPath = _scss_import.processImportPath(scssPath, this.rwsWorkspaceDir, path.dirname(scssPath))    
+    scssPath = _scss_import.processImportPath(scssPath, this.getRWSWorkspaceDir(), this.getRWSRootDir(),path.dirname(scssPath))    
 
 
-    let scssCode = _scss_fs.getCodeFromFile(scssPath, this.rwsWorkspaceDir);
+    let scssCode = _scss_fs.getCodeFromFile(scssPath, this.getRWSWorkspaceDir());
 
-    return await _scss_compiler.compileScssCode(scssCode, path.dirname(scssPath), this.rwsWorkspaceDir);
+    return await _scss_compiler.compileScssCode(scssCode, path.dirname(scssPath), this.getRWSWorkspaceDir(), this.getRWSRootDir());
   }
 
   async compileScssCode(scssCode, scssPath){    
-    return await _scss_compiler.compileScssCode(scssCode, scssPath, this.rwsWorkspaceDir);
+    return await _scss_compiler.compileScssCode(scssCode, scssPath, this.getRWSWorkspaceDir(), this.getRWSRootDir());
   }
 
   writeCssFile(scssFilePath, cssContent){
@@ -64,6 +66,10 @@ class RWSScssPlugin {
   }
 
   getRWSWorkspaceDir() {
+    return this.rwsWorkspaceDir;
+  }
+
+  getRWSRootDir() {
     return this.rwsWorkspaceDir;
   }
 }

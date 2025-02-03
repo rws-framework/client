@@ -9,10 +9,10 @@ let _scss_fonts = null;
 const _scss_import_builder = require('./_import');
 let _scss_import = null;
 
-function compileScssCode(scssCode, fileRootDir, rwsWorkspaceDir) {  
+function compileScssCode(scssCode, fileRootDir, rwsWorkspaceDir, appRoot) {  
     _scss_fonts = _scss_fonts_builder(this);
     _scss_import = _scss_import_builder(this);    
-    const [scssImports] = _scss_import.extractScssImports(scssCode, rwsWorkspaceDir, fileRootDir);
+    const [scssImports] = _scss_import.extractScssImports(scssCode, rwsWorkspaceDir, appRoot, fileRootDir);
 
     const dependencies = scssImports.map((item) => item[2]);
 
@@ -38,7 +38,7 @@ function compileScssCode(scssCode, fileRootDir, rwsWorkspaceDir) {
       const result = sass.compileString(scssCode, { loadPaths: [fileRootDir]});
 
       let compiledCode = result.css.toString();
-      compiledCode = _scss_fonts.replaceFontUrlWithBase64(compiledCode, rwsWorkspaceDir);
+      compiledCode = _scss_fonts.replaceFontUrlWithBase64(compiledCode, rwsWorkspaceDir, appRoot);
       compiledCode = replaceEmojisWithQuestionMark(compiledCode, fileRootDir);
       return { code: compiledCode, dependencies};
     } catch (err) {

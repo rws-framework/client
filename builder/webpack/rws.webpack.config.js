@@ -18,11 +18,12 @@ const { executeRWSStartActions, timingActions, devActions } = require('../../cfg
 const { webpackDevServer } = require('../../cfg/build_steps/webpack/_dev_servers');
 const { RWS_WEBPACK_PLUGINS_BAG, addStartPlugins } = require('../../cfg/build_steps/webpack/_plugins');
 
-const _MAIN_PACKAGE = rwsPath.findRootWorkspacePath(process.cwd());
 
 // #SECTION INIT OPTIONS
 
-const RWSWebpackWrapper = async (rwsFrontendConfig,  _packageDir) => {
+const RWSWebpackWrapper = async (appRoot, rwsFrontendConfig,  _packageDir) => {
+  const _MAIN_PACKAGE = rwsPath.findRootWorkspacePath(appRoot);
+
   const {
     executionDir,
     isWatcher,
@@ -108,12 +109,13 @@ const RWSWebpackWrapper = async (rwsFrontendConfig,  _packageDir) => {
       actions: WEBPACK_AFTER_ACTIONS, 
       error_actions: WEBPACK_AFTER_ERROR_ACTIONS, 
       dev: isDev,
-      devDebug 
+      devDebug,
+      appRoot 
     }));
   }
 
   // #SECTION RWS WEBPACK BUILD
-  const cfgExport = createWebpackConfig(
+  const cfgExport = createWebpackConfig({
     executionDir,
     _packageDir,
     isDev,
@@ -127,11 +129,12 @@ const RWSWebpackWrapper = async (rwsFrontendConfig,  _packageDir) => {
     modules_setup,
     aliases,
     tsConfig,
-    RWS_WEBPACK_PLUGINS_BAG.getPlugins(),
+    WEBPACK_PLUGINS: RWS_WEBPACK_PLUGINS_BAG.getPlugins(),
     rwsExternals,
     devExternalsVars,
-    rwsFrontendConfig.entrypoint
-  );  
+    appRootDir: appRoot,
+    entrypoint: rwsFrontendConfig.entrypoint
+});  
 
   if (optimConfig) {
     // setup production config if it got created above

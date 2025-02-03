@@ -15,7 +15,7 @@ module.exports = async function(content) {
 
     if(saveFile){
         try {        
-            const codeData = await plugin.compileScssCode(content, path.dirname(filePath), null, filePath, !isDev);                                
+            const codeData = await plugin.compileScssCode(content, path.dirname(filePath));                                
 
             const code = codeData.code;
             const deps = codeData.dependencies;        

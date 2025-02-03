@@ -3,7 +3,7 @@ const rwsAfterSW = require('./after/sw');
 const deepmerge = require('deepmerge');
 
 
-const _DEFAULT_CONFIG = { actions: [], executionDir: process.cwd(), packageDir: process.cwd(), dev: false, devDebug: null }
+const _DEFAULT_CONFIG = { actions: [], executionDir: null, packageDir: null, dev: false, devDebug: null }
 
 const _DEFAULT_ACTION = {
     type: 'copy',
@@ -113,7 +113,7 @@ class RWSWebpackPlugin {
             case 'service_worker': {
 
                 const serviceWorkerPath = typeof action === 'function' ? await action() : action;
-                await rwsAfterSW(serviceWorkerPath);
+                await rwsAfterSW(this.config.appRoot, serviceWorkerPath);
                 return;
             };
 

@@ -7,7 +7,7 @@ const { _DEFAULT_CONFIG } = require('../../_default.cfg');
 
 async function getBuildConfig(rwsFrontBuildConfig, _packageDir){
     const BuildConfigurator = new RWSConfigBuilder(path.join(rwsPath.findPackageDir(process.cwd()), '.rws.json'), {..._DEFAULT_CONFIG, ...rwsFrontBuildConfig});
-    const executionDir = rwsPath.relativize(BuildConfigurator.get('executionDir') || rwsFrontBuildConfig.executionDir || process.cwd(), _packageDir);
+    const executionDir = rwsPath.relativize(BuildConfigurator.get('executionDir') || rwsFrontBuildConfig.executionDir || process.env.RWS_APP_ROOT || process.cwd(), _packageDir);
     const isWatcher = process.argv.includes('--watch') || false;  
 
     const isDev = isWatcher ? true : (BuildConfigurator.get('dev', rwsFrontBuildConfig.dev) || false);

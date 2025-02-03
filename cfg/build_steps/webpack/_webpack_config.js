@@ -1,7 +1,7 @@
 const { getRWSLoaders } = require('./_loaders');
 const path = require('path');
 
-function createWebpackConfig(
+function createWebpackConfig({
     executionDir,
     _packageDir,
     isDev,
@@ -18,8 +18,9 @@ function createWebpackConfig(
     WEBPACK_PLUGINS,
     rwsExternals,
     devExternalsVars,
+    appRootDir,
     entrypoint
-) {
+}) {
     return {
         context: executionDir,
         entry: {
@@ -41,7 +42,7 @@ function createWebpackConfig(
             }
         },
         module: {
-            rules: getRWSLoaders(_packageDir, executionDir, tsConfig, entrypoint),
+            rules: getRWSLoaders(_packageDir, executionDir, tsConfig, appRootDir, entrypoint),
         },
         plugins: WEBPACK_PLUGINS,
         externals: rwsExternals(_packageDir, executionDir, modules_setup, automatedChunks, {
