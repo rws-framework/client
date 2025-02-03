@@ -30,15 +30,15 @@ function getRWSLoaders(packageDir, executionDir, tsConfig, appRootDir, entrypoin
         {
           loader: 'ts-loader',
           options: {
+            ...tsConfig,
             transpileOnly: false, 
-            logLevel: "info", // Show more detailed errors
+            logLevel: "info",
             logInfoToStdOut: true,
             context: executionDir,
             errorFormatter: (message, colors) => {
               const messageText = message.message || message;
               return `\nTS Error: ${messageText}\n`;
-            },
-            ...tsConfig
+            },         
           }
         },
         {
@@ -51,7 +51,6 @@ function getRWSLoaders(packageDir, executionDir, tsConfig, appRootDir, entrypoin
       ],
       include: [
         path.resolve(executionDir, 'src'),
-        path.resolve(executionDir, '@dev', 'client', 'src'),
         path.resolve(packageDir, 'src'),
         path.resolve(packageDir, 'foundation', 'rws-foundation.d.ts')
       ],
@@ -68,6 +67,7 @@ function getRWSLoaders(packageDir, executionDir, tsConfig, appRootDir, entrypoin
       ],
     },
   ];
+
 
   return loaders;
 }
