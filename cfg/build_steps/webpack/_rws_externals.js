@@ -12,7 +12,7 @@ const _defaultOpts = {
   }
 }
 
-const externals = (declaredCodeBase, nodeModules, automatedChunks, externalOptions = _defaultOpts) => ({context, request}, callback) => {
+const externals = (pkgPath, declaredCodeBase, nodeModules, automatedChunks, externalOptions = _defaultOpts) => ({context, request}, callback) => {
     let theOptions = _defaultOpts;
 
     if(externalOptions !== null){      
@@ -36,7 +36,7 @@ const externals = (declaredCodeBase, nodeModules, automatedChunks, externalOptio
 
     const frontendDirs = [
       codeBase,
-      path.resolve(__dirname,'..','..','..')
+      pkgPath
     ];        
 
     const inFrontendContext = frontendDirs.some(dir => context.startsWith(dir)) || 

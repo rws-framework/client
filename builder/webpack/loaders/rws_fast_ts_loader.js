@@ -12,8 +12,7 @@ module.exports = async function(content) {
     const filePath = this.resourcePath;
     const isDev = this._compiler.options.mode === 'development';       
     let isIgnored = false;
-    let isDebugged = false;  
-
+    let isDebugged = false;      
     // timingStart('decorator_extraction');
     const decoratorExtract = LoadersHelper.extractRWSViewArgs(processedContent);    
     const decoratorData = decoratorExtract ? decoratorExtract.viewDecoratorData : null;
@@ -62,7 +61,7 @@ module.exports = async function(content) {
     try { 
         if(tagName){                                   
             const [template, htmlFastImports, templateExists] = await LoadersHelper.getTemplate(filePath, this.addDependency, templateName, isDev);         
-            const styles = await LoadersHelper.getStyles(filePath, this.addDependency, templateExists, stylesPath, isDev);  
+            const styles = await LoadersHelper.getStyles(filePath, this.query?.rwsWorkspaceDir, this.addDependency, templateExists, stylesPath, isDev);  
 
             if(className){                
                 const replacedViewDecoratorContent =  decoratorExtract.replacedDecorator;  

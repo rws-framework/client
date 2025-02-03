@@ -3,7 +3,6 @@ const path = require('path');
 
 function createWebpackConfig(
     executionDir,
-    clientPkgPath,
     _packageDir,
     isDev,
     devTools,
@@ -15,10 +14,11 @@ function createWebpackConfig(
     automatedChunks,
     modules_setup,
     aliases,
-    tsConfigPath,
+    tsConfig,
     WEBPACK_PLUGINS,
     rwsExternals,
-    devExternalsVars
+    devExternalsVars,
+    entrypoint
 ) {
     return {
         context: executionDir,
@@ -41,18 +41,12 @@ function createWebpackConfig(
             }
         },
         module: {
-            rules: getRWSLoaders(clientPkgPath, path.resolve(_packageDir, 'node_modules'), tsConfigPath, devDebug),
+            rules: getRWSLoaders(_packageDir, executionDir, tsConfig, entrypoint),
         },
         plugins: WEBPACK_PLUGINS,
-        externals: rwsExternals(executionDir, modules_setup, automatedChunks, {
+        externals: rwsExternals(_packageDir, executionDir, modules_setup, automatedChunks, {
             _vars: devExternalsVars
-        }),
-        cache: {
-            type: 'filesystem',
-            buildDependencies: {
-                config: [__filename],
-            },
-        }
+        })      
     }
 }
 

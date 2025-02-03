@@ -2,20 +2,20 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 
+const { parseWebpackPath } = require('./_parser');
+
 const RWSCssPlugin = require("../../../builder/webpack/rws_scss_plugin");
-const plugin = new RWSCssPlugin();
-const JSON5 = require('json5');
+
 const chalk = require('chalk');
 const { timingCounterStart, timingCounterStop } = require('./_timing');
-const { rwsRuntimeHelper } = require('@rws-framework/console');
+const { rwsRuntimeHelper, rwsPath } = require('@rws-framework/console');
 
-function getRWSLoaders(packageDir, nodeModulesPath, tsConfigPath, devDebug) {
-  const scssLoader = packageDir + '/builder/webpack/loaders/rws_fast_scss_loader.js';
-  const tsLoader = packageDir + '/builder/webpack/loaders/rws_fast_ts_loader.js';
-  const htmlLoader = packageDir + '/builder/webpack/loaders/rws_fast_html_loader.js';
+function getRWSLoaders(packageDir, executionDir, tsConfig, entrypoint) {
+  const scssLoader = path.join(packageDir, 'builder/webpack/loaders/rws_fast_scss_loader.js');
+  const tsLoader = path.join(packageDir, 'builder/webpack/loaders/rws_fast_ts_loader.js');
+  const htmlLoader = path.join(packageDir, 'builder/webpack/loaders/rws_fast_html_loader.js');
 
-
-  return [
+  const loaders = [
     {
       test: /\.html$/,
       use: [
@@ -30,19 +30,34 @@ function getRWSLoaders(packageDir, nodeModulesPath, tsConfigPath, devDebug) {
         {
           loader: 'ts-loader',
           options: {
-            transpileOnly: true,
-            allowTsInNodeModules: true,
-            configFile: path.resolve(tsConfigPath)            
+            transpileOnly: false, 
+            logLevel: "info", // Show more detailed errors
+            logInfoToStdOut: true,
+            context: executionDir,
+            errorFormatter: (message, colors) => {
+              const messageText = message.message || message;
+              return `\nTS Error: ${messageText}\n`;
+            },
+            ...tsConfig
           }
         },
         {
           loader: tsLoader,
+          options: {
+            rwsWorkspaceDir: executionDir
+          }
         }
+      ],
+      include: [
+        path.resolve(executionDir, 'src'),
+        path.resolve(executionDir, '@dev', 'client', 'src'),
+        path.resolve(packageDir, 'src'),
+        path.resolve(packageDir, 'foundation', 'rws-foundation.d.ts')
       ],
       exclude: [        
         /node_modules\/(?!\@rws-framework\/[A-Z0-9a-z])/,
         /\.debug\.ts$/,
-        /\.d\.ts$/,
+        /\.d\.ts$/        
       ],
     },
     {
@@ -51,7 +66,9 @@ function getRWSLoaders(packageDir, nodeModulesPath, tsConfigPath, devDebug) {
         scssLoader,
       ],
     },
-  ]
+  ];
+
+  return loaders;
 }
 
 function _extractRWSViewDefs(fastOptions = {}, decoratorArgs = {})
@@ -98,7 +115,7 @@ function extractRWSViewArgs(content, noReplace = false) {
       if (groupIndex === 2) {
         if (match) {
           try {            
-            decoratorArgs = JSON5.parse(match);
+            decoratorArgs = JSON.parse(JSON.stringify(match));
           } catch(e){
             console.log(chalk.red('Decorator options parse error: ') + e.message + '\n Problematic line:');
             console.log(`
@@ -106,6 +123,8 @@ function extractRWSViewArgs(content, noReplace = false) {
             `);
             console.log(chalk.yellowBright(`Decorator options failed to parse for "${tagName}" component.`) + ' { decoratorArgs } defaulting to null.');
             console.log(match);
+
+            console.error(e);
 
             throw new Error('Failed parsing @RWSView')
           }                   
@@ -161,18 +180,19 @@ function extractRWSViewArgs(content, noReplace = false) {
   }
 }
 
-async function getStyles(filePath, addDependency, templateExists, stylesPath = null, isDev = false) {
+async function getStyles(filePath, rwsWorkspaceDir, addDependency, templateExists, stylesPath = null, isDev = false) {
   if(!stylesPath){
     stylesPath = 'styles/layout.scss';
   }
 
   let styles = 'const styles: null = null;'
-  const stylesFilePath = path.dirname(filePath) + '/' + stylesPath;
+  const stylesFilePath = path.join(path.dirname(filePath),  stylesPath);
 
   if (fs.existsSync(stylesFilePath)) {  
     const scsscontent = fs.readFileSync(stylesFilePath, 'utf-8');
     timingCounterStart();
-    const codeData = await plugin.compileScssCode(scsscontent, path.dirname(filePath) + '/styles', null, filePath, !isDev);
+    const plugin = new RWSCssPlugin({ rwsWorkspaceDir });
+    const codeData = await plugin.compileScssCode(scsscontent, path.join(path.dirname(filePath), 'styles'), null, filePath, !isDev);
     const elapsed = timingCounterStop();
     let currentTimingList = rwsRuntimeHelper.getRWSVar('_timer_css');
 
@@ -193,7 +213,7 @@ async function getStyles(filePath, addDependency, templateExists, stylesPath = n
     }
     styles += `const styles = ${templateExists ? 'T.' : ''}css\`${cssCode}\`;\n`;
 
-    addDependency(path.dirname(filePath) + '/' + stylesPath);
+    addDependency(path.join(path.dirname(filePath), '/', stylesPath));
   }
 
   return styles;

@@ -32,6 +32,7 @@ module.exports = async (copyList = {}, pluginCfg) => {
         // If sourcePath is a directory, collect all files recursively
         const allFiles = collectFiles(sourcePath);
         allFiles.forEach((file) => {
+          
           const relativePath = path.relative(sourcePath, file);
           const targetFilePath = path.join(targetPath, relativePath);
           const targetFileDir = path.dirname(targetFilePath);

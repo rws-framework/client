@@ -5,7 +5,7 @@ const { rwsPath } = require('@rws-framework/console');
 const path = require('path');
 const fs = require('fs');
 
-function setupTsConfig(tsConfigPath, executionDir, userAliases = {}) {
+function setupTsConfig(tsConfigPath, executionDir, pkgPath, userAliases = {}) {
 
     if (!fs.existsSync(tsConfigPath)) {
         throw new Error(`Typescript config file "${tsConfigPath}" does not exist`);
@@ -16,15 +16,14 @@ function setupTsConfig(tsConfigPath, executionDir, userAliases = {}) {
     try {
         let tsConfig = JSON.parse(tsConfigContents);
 
-        const declarationsPath = path.resolve(__dirname, '..', 'types') + '/declarations.d.ts';
-        const foundationPath = path.resolve(__dirname, '..', 'foundation');
-        const testsPath = path.resolve(__dirname, '..', 'tests');
+        const declarationsPath = path.resolve(pkgPath, 'types') + '/declarations.d.ts';
+        const foundationPath = path.resolve(pkgPath, 'foundation');
+        const testsPath = path.resolve(pkgPath, 'tests');
 
 
         const relativeDeclarationsPath = path.relative(path.dirname(tsConfigPath), declarationsPath);
         const relativeTestsPath = path.relative(path.dirname(tsConfigPath), testsPath);
         const relativeFoundationPath = path.relative(path.dirname(tsConfigPath), foundationPath);
-
 
         const includedMD5 = [];
         const srcPath = 'src/index.ts';
@@ -92,8 +91,6 @@ function setupTsConfig(tsConfigPath, executionDir, userAliases = {}) {
                 if(!tsPaths[alias]){
         
                     tsPaths[alias] = [path.relative(executionDir, aliasPath)];
-
-                    console.log({alias, x: tsPaths[alias]});
 
                     changedPaths = true;                    
                 }

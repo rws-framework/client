@@ -22,7 +22,7 @@ const _MAIN_PACKAGE = rwsPath.findRootWorkspacePath(process.cwd());
 
 // #SECTION INIT OPTIONS
 
-const RWSWebpackWrapper = async (rwsFrontendConfig) => {
+const RWSWebpackWrapper = async (rwsFrontendConfig,  _packageDir) => {
   const {
     executionDir,
     isWatcher,
@@ -42,11 +42,10 @@ const RWSWebpackWrapper = async (rwsFrontendConfig) => {
     devTools,
     devDebug,
     devRouteProxy,
-    tsConfigPath,
+    tsConfig,
     rwsPlugins,
-    _packageDir,
     BuildConfigurator
-  } = await getBuildConfig(rwsFrontendConfig);
+  } = await getBuildConfig(rwsFrontendConfig, _packageDir);
 
   timeLog({ devDebug });
 
@@ -55,25 +54,20 @@ const RWSWebpackWrapper = async (rwsFrontendConfig) => {
   }  
 
   rwsPath.removeDirectory(outputDir, true);
-  buildInfo.start(executionDir, tsConfigPath, outputDir, isDev, publicDir, isParted, partedPrefix, partedDirUrlPrefix, devTools, rwsFrontendConfig.rwsPlugins);
+  buildInfo.start(executionDir, tsConfig, outputDir, isDev, publicDir, isParted, partedPrefix, partedDirUrlPrefix, devTools, rwsFrontendConfig.rwsPlugins);
 
   // #SECTION INIT PLUGINS && ENV VARS DEFINES
-  addStartPlugins(rwsFrontendConfig, BuildConfigurator, devDebug, isHotReload, isReport, tsConfigPath);
+  addStartPlugins(rwsFrontendConfig, BuildConfigurator, devDebug, isHotReload, isReport);
 
   const WEBPACK_AFTER_ACTIONS = rwsFrontendConfig.actions || [];
   const WEBPACK_AFTER_ERROR_ACTIONS = rwsFrontendConfig.error_actions || [];
 
-  const modules_setup = ['node_modules'];
+  const modules_setup = [path.resolve(tools.findRootWorkspacePath(executionDir), 'node_modules')];
 
   let optimConfig = null;
   let aliases = rwsFrontendConfig.aliases || {};
 
-  console.log({  
-    __filename,
-    _packageDir
-  });
-
-  aliases = { ...aliases, ...loadAliases(__dirname, path.resolve(_MAIN_PACKAGE, 'node_modules'), executionDir) }  
+  aliases = { ...aliases, ...loadAliases(_packageDir, path.resolve(_MAIN_PACKAGE, 'node_modules'), executionDir) }  
 
   // #SECTION PLUGIN STARTING HOOKS
 
@@ -85,21 +79,14 @@ const RWSWebpackWrapper = async (rwsFrontendConfig) => {
 
 
    // #SECTION RWS COMPONENT SCAN && PARTED PROCESSING
-  const RWSComponents = scanComponents(await partedComponentsEvents(partedComponentsLocations, rwsPlugins, isParted), executionDir, __dirname);
+  const RWSComponents = scanComponents(await partedComponentsEvents(partedComponentsLocations, rwsPlugins, isParted), executionDir, _packageDir);
   console.log(`${chalk.cyanBright('RWS Scanned')} ${chalk.yellowBright(RWSComponents.length)} components`);
-  const { automatedChunks, automatedEntries } = setComponentsChunks(rwsFrontendConfig.entry, RWSComponents, isParted);
+  const { automatedChunks, automatedEntries } = setComponentsChunks(rwsFrontendConfig.entrypoint, RWSComponents, isParted);
 
   // #SECTION RWS INFO FILE
   generateRWSInfoFile(outputDir, automatedEntries);
   console.log(chalk.greenBright(`RWSInfo file generated.`));
 
-
-  // #SECTION TSCONFIG VALIDATION/SETUP
-  const tsValidated = tools.setupTsConfig(tsConfigPath, executionDir, rwsFrontendConfig.aliases);
-
-  if (!tsValidated) {
-    throw new Error('RWS Webpack build failed.');
-  }
 
   if (!isDev) {
     // #SECTION RWS PROD SETUP
@@ -128,7 +115,6 @@ const RWSWebpackWrapper = async (rwsFrontendConfig) => {
   // #SECTION RWS WEBPACK BUILD
   const cfgExport = createWebpackConfig(
     executionDir,
-    path.resolve(__dirname, '..', '..'),
     _packageDir,
     isDev,
     devTools,
@@ -140,10 +126,11 @@ const RWSWebpackWrapper = async (rwsFrontendConfig) => {
     automatedChunks,
     modules_setup,
     aliases,
-    tsConfigPath,
+    tsConfig,
     RWS_WEBPACK_PLUGINS_BAG.getPlugins(),
     rwsExternals,
-    devExternalsVars
+    devExternalsVars,
+    rwsFrontendConfig.entrypoint
   );  
 
   if (optimConfig) {

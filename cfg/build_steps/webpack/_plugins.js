@@ -48,7 +48,7 @@ function getDefinesPlugins(BuildConfigurator, rwsFrontendConfig, devDebug) {
     ]
 }
 
-function getBuilderDevPlugins(BuildConfigurator, rwsFrontendConfig, tsConfigPath, devDebug) {    
+function getBuilderDevPlugins(BuildConfigurator, rwsFrontendConfig, devDebug) {    
     if(!devDebug?.profiling){
         return [];
     }
@@ -63,18 +63,18 @@ function getBuilderDevPlugins(BuildConfigurator, rwsFrontendConfig, tsConfigPath
     ]
 }
 
-function getBuilderOptimPlugins(BuildConfigurator, rwsFrontendConfig, tsConfigPath) {
+function getBuilderOptimPlugins(BuildConfigurator, rwsFrontendConfig) {
     return [
         
     ]
 }
 
-function addStartPlugins(rwsFrontendConfig, BuildConfigurator, devDebug, isHotReload, isReport, tsConfigPath) {
+function addStartPlugins(rwsFrontendConfig, BuildConfigurator, devDebug, isHotReload, isReport) {
 
     RWS_WEBPACK_PLUGINS_BAG.add([
         ...getDefinesPlugins(BuildConfigurator, rwsFrontendConfig, devDebug),
-        ...getBuilderDevPlugins(BuildConfigurator, rwsFrontendConfig, tsConfigPath, devDebug),
-        ...getBuilderOptimPlugins(BuildConfigurator, rwsFrontendConfig, tsConfigPath),
+        ...getBuilderDevPlugins(BuildConfigurator, rwsFrontendConfig, devDebug),
+        ...getBuilderOptimPlugins(BuildConfigurator, rwsFrontendConfig),
         ...getPackageModPlugins()
     ]);
 
@@ -84,7 +84,7 @@ function addStartPlugins(rwsFrontendConfig, BuildConfigurator, devDebug, isHotRe
         }
 
         RWS_WEBPACK_PLUGINS_BAG.add(new HtmlWebpackPlugin({
-            template: publicDir + '/' + publicIndex,
+            template: path.join(publicDir, '/', publicIndex),
         }));
     }
 

@@ -9,16 +9,15 @@ let _scss_fonts = null;
 const _scss_import_builder = require('./_import');
 let _scss_import = null;
 
-function compileScssCode(scssCode, fileRootDir, createFile = false, filePath = null, minify = false) {  
+function compileScssCode(scssCode, fileRootDir, rwsWorkspaceDir) {  
     _scss_fonts = _scss_fonts_builder(this);
-    _scss_import = _scss_import_builder(this);
-
-    const [scssImports] = _scss_import.extractScssImports(scssCode, fileRootDir);
+    _scss_import = _scss_import_builder(this);    
+    const [scssImports] = _scss_import.extractScssImports(scssCode, rwsWorkspaceDir, fileRootDir);
 
     const dependencies = scssImports.map((item) => item[2]);
 
     if (scssImports && scssImports.length) {
-      scssCode = _scss_import.replaceImports(_scss_import.processImports(scssImports, fileRootDir), scssCode);
+      scssCode = _scss_import.replaceImports(_scss_import.processImports(scssImports, rwsWorkspaceDir, fileRootDir), scssCode);
     }
 
     const uses = _scss_import.extractScssUses(scssCode)[0];
@@ -39,7 +38,7 @@ function compileScssCode(scssCode, fileRootDir, createFile = false, filePath = n
       const result = sass.compileString(scssCode, { loadPaths: [fileRootDir]});
 
       let compiledCode = result.css.toString();
-      compiledCode = _scss_fonts.replaceFontUrlWithBase64(compiledCode);
+      compiledCode = _scss_fonts.replaceFontUrlWithBase64(compiledCode, rwsWorkspaceDir);
       compiledCode = replaceEmojisWithQuestionMark(compiledCode, fileRootDir);
       return { code: compiledCode, dependencies};
     } catch (err) {

@@ -1,18 +1,18 @@
 const chalk = require('chalk');
+const path = require('path');
+
 const { RWSConfigBuilder } = require('@rws-framework/console')
 const { rwsPath } = require('@rws-framework/console');
 const { _DEFAULT_CONFIG } = require('../../_default.cfg');
 
-async function getBuildConfig(rwsFrontBuildConfig){
-    const BuildConfigurator = new RWSConfigBuilder(rwsPath.findPackageDir(process.cwd()) + '/.rws.json', {..._DEFAULT_CONFIG, ...rwsFrontBuildConfig});
-    const _packageDir = rwsPath.findPackageDir(process.cwd());
-
+async function getBuildConfig(rwsFrontBuildConfig, _packageDir){
+    const BuildConfigurator = new RWSConfigBuilder(path.join(rwsPath.findPackageDir(process.cwd()), '.rws.json'), {..._DEFAULT_CONFIG, ...rwsFrontBuildConfig});
     const executionDir = rwsPath.relativize(BuildConfigurator.get('executionDir') || rwsFrontBuildConfig.executionDir || process.cwd(), _packageDir);
     const isWatcher = process.argv.includes('--watch') || false;  
 
     const isDev = isWatcher ? true : (BuildConfigurator.get('dev', rwsFrontBuildConfig.dev) || false);
-    const isHotReload = BuildConfigurator.get('hot', rwsFrontBuildConfig.hot);
-    const isReport = BuildConfigurator.get('report', rwsFrontBuildConfig.report);
+    const isHotReload = BuildConfigurator.get('hotReload', rwsFrontBuildConfig.hotReload);
+    const isReport = BuildConfigurator.get('pkgReport', rwsFrontBuildConfig.pkgReport);
     const isParted = BuildConfigurator.get('parted', rwsFrontBuildConfig.parted || false);
 
     const partedPrefix = BuildConfigurator.get('partedPrefix', rwsFrontBuildConfig.partedPrefix);
@@ -20,7 +20,7 @@ async function getBuildConfig(rwsFrontBuildConfig){
 
     let partedComponentsLocations = BuildConfigurator.get('partedComponentsLocations', rwsFrontBuildConfig.partedComponentsLocations);
     const customServiceLocations = BuildConfigurator.get('customServiceLocations', rwsFrontBuildConfig.customServiceLocations); //@todo: check if needed
-    const outputDir = rwsPath.relativize(BuildConfigurator.get('outputDir', rwsFrontBuildConfig.outputDir), _packageDir);
+    const outputDir = rwsPath.relativize(BuildConfigurator.get('outputDir', rwsFrontBuildConfig.outputDir), executionDir);
 
     const outputFileName = BuildConfigurator.get('outputFileName') || rwsFrontBuildConfig.outputFileName;
     const publicDir = BuildConfigurator.get('publicDir') || rwsFrontBuildConfig.publicDir;
@@ -37,7 +37,7 @@ async function getBuildConfig(rwsFrontBuildConfig){
 
     const devRouteProxy = BuildConfigurator.get('devRouteProxy') || rwsFrontBuildConfig.devRouteProxy;
 
-    const tsConfigPath = rwsPath.relativize(BuildConfigurator.get('tsConfigPath') || rwsFrontBuildConfig.tsConfigPath, executionDir);
+    const tsConfig = BuildConfigurator.get('tsConfig') || rwsFrontBuildConfig.tsConfig;
 
     const rwsPlugins = {};
 
@@ -67,9 +67,8 @@ async function getBuildConfig(rwsFrontBuildConfig){
         devTools,
         devDebug,
         devRouteProxy,
-        tsConfigPath,
-        rwsPlugins,
-        _packageDir,
+        tsConfig,
+        rwsPlugins,        
         BuildConfigurator
     }
 }

@@ -1,11 +1,12 @@
 const chalk = require('chalk');
+const util = require('util');
+
+
 
 module.exports = {
-    start: (executionDir, tsConfigPath, outputDir, isDev, publicDir, isParted, partedPrefix, partedDirUrlPrefix, devTools, rwsPlugins) => {
-        console.log(chalk.green('Build started with'))
-        console.log({
-        executionDir,
-        tsConfigPath,
+    start: (executionDir, tsConfig, outputDir, isDev, publicDir, isParted, partedPrefix, partedDirUrlPrefix, devTools, rwsPlugins) => {        
+        console.log(chalk.green('RWS Frontend build started with:'), {
+        executionDir,        
         outputDir,
         dev: isDev,
         publicDir,
@@ -15,5 +16,11 @@ module.exports = {
         devtool: devTools,
         plugins: rwsPlugins
         });
+
+        console.log(chalk.blue('\nTSCONFIG:'), util.inspect(tsConfig, {
+            depth: null,
+            colors: true,
+            maxArrayLength: null
+        }));
     }
 }

@@ -47,13 +47,14 @@ function readSCSSFilesFromDirectory(dirPath) {
   };
 
 
-  function getCodeFromFile(filePath) {
+  function getCodeFromFile(filePath, rwsWorkspaceDir) {
     filePath = filePath.replace('//', '/');
     const _scss_import_builder = require('./_import');    
     _scss_import = _scss_import_builder(this);
 
     if (!fs.existsSync(filePath)) {
-      const processedImportPath = _scss_import.processImportPath(filePath, path.dirname(filePath));
+      const processedImportPath = _scss_import.processImportPath(filePath, rwsWorkspaceDir, path.dirname(filePath));
+
       if (!fs.existsSync(processedImportPath)) {
         throw new Error(`SCSS loader: File path "${filePath}" was not found.`);
       }

@@ -7,7 +7,7 @@ function processEnvDefines(BuildConfigurator, config, devDebug) {
         'process.env._RWS_BUILD_OVERRIDE': JSON.stringify(BuildConfigurator.exportBuildConfig())
     }
 
-    const rwsDefines = BuildConfigurator.get('rwsDefines') || config.rwsDefines || null;
+    const rwsDefines = BuildConfigurator.get('env') || config.env || null;
 
     if (rwsDefines) {
         _rws_defines = { ..._rws_defines, ...rwsDefines }
