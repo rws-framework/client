@@ -1,7 +1,7 @@
 {
     "name": "@rws-framework/client",
     "private": false,
-    "version": "2.15.4",
+    "version": "2.15.5",
     "main": "src/index.ts",
     "scripts": {
         "docs": "typedoc --tsconfig ./tsconfig.json"
@@ -105,5 +105,6 @@
     },
     "overrides": {
         "lodash": "^4.17.21"
-    }
+    },
+    "_rws": true
 }
