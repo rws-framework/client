@@ -31,6 +31,7 @@ function getRWSLoaders(packageDir, executionDir, tsConfig, appRootDir, entrypoin
           loader: 'ts-loader',
           options: {
             ...tsConfig,
+            configFile: false,
             transpileOnly: false, 
             logLevel: "info",
             logInfoToStdOut: true,
