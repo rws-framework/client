@@ -52,7 +52,7 @@ class RWSScssPlugin {
     scssPath = _scss_import.processImportPath(scssPath, this.getRWSWorkspaceDir(), this.getRWSRootDir(),path.dirname(scssPath))    
 
 
-    let scssCode = _scss_fs.getCodeFromFile(scssPath, this.getRWSWorkspaceDir());
+    let scssCode = _scss_fs.getCodeFromFile(scssPath, this.getRWSWorkspaceDir(), this.getRWSRootDir());
 
     return await _scss_compiler.compileScssCode(scssCode, path.dirname(scssPath), this.getRWSWorkspaceDir(), this.getRWSRootDir());
   }
@@ -70,7 +70,7 @@ class RWSScssPlugin {
   }
 
   getRWSRootDir() {
-    return this.rwsWorkspaceDir;
+    return this.appRootDir;
   }
 }
 

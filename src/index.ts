@@ -21,9 +21,8 @@ import { RWSPlugin } from './plugins/_plugin';
 
 import type { DefaultRWSPluginOptionsType } from './plugins/_plugin';
 
-import type { IRWSPlugin, IStaticRWSPlugin } from './types/IRWSPlugin';
+import type { IRWSPlugin, IStaticRWSPlugin, IPluginSpawnOption } from './types/IRWSPlugin';
 import RWSClient, { RWSClientInstance } from './client';
-import type  { RWSPluginEntry } from './types/IRWSConfig';
 import type IRWSUser from './types/IRWSUser';
 import RWSViewComponent from './components/_component';
 import type { IAssetShowOptions } from './components/_component';
@@ -42,7 +41,7 @@ export {
     RWSClientInstance,
 
     RWSPlugin,
-    RWSPluginEntry,
+    IPluginSpawnOption,
     IRWSPlugin, IStaticRWSPlugin,
     DefaultRWSPluginOptionsType,
     

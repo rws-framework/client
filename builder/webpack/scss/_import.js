@@ -13,9 +13,9 @@ function processImportPath(importPath, rwsWorkspaceDir, appRootDir, fileRootDir 
     _scss_fs = _scss_fs_builder(this);
     const workspaceDir = this.getRWSWorkspaceDir ? this.getRWSWorkspaceDir() : rwsWorkspaceDir;
     const appRoot = this.getRWSWorkspaceDir ? this.getRWSRootDir() : appRootDir;
-
+  
     if (importPath.split('')[0] === '~') {
-        return fillSCSSExt(replaceWithNodeModules(importPath, appRootDir, null, true), noext);
+        return fillSCSSExt(replaceWithNodeModules(importPath, appRoot, null, true), noext);
     }
 
     if (importPath.indexOf('@rws-mixins') === 0) {
@@ -67,26 +67,6 @@ function underscorePath(path, noext = false) {
     return partSplit.join('/');
 }
 
-function fillSCSSExt(scssPath, noext = false) {
-    const underscoredPath = underscorePath(scssPath, noext);
-    if (!fs.existsSync(scssPath) && fs.existsSync(underscoredPath)) {
-        return underscoredPath;
-    }
-
-    if (noext) {
-        return scssPath;
-    }
-
-    if ((!fs.existsSync(scssPath) || (fs.existsSync(scssPath) && fs.statSync(scssPath).isDirectory())) && fs.existsSync(`${scssPath}.scss`)) {
-        return `${scssPath}.scss`;
-    }
-
-    if (fs.existsSync(`_${scssPath}.scss`)) {
-        return `${scssPath}.scss`;
-    }
-
-    return scssPath;
-}
 
 function fillSCSSExt(scssPath, noext = false) {
     const underscoredPath = underscorePath(scssPath, noext);
@@ -157,7 +137,8 @@ function detectImports(code) {
 
 function replaceWithNodeModules(input, appRootDir, fileDir = null, absolute = false, token = '~') {
     _scss_fs = _scss_fs_builder(this);
-    return input.replace(token, absolute ? `${path.resolve(appRootDir, 'node_modules')}/` : this.node_modules_dir(fileDir ? fileDir : appRootDir));
+   
+    return input.replace(token, absolute ? `${path.join(appRootDir, 'node_modules')}/` : this.node_modules_dir(fileDir ? fileDir : appRootDir));
 }
 
 function processImports(imports, fileRootDir, rwsWorkspaceDir, importStorage = {}, sub = false) {
@@ -184,8 +165,8 @@ function processImports(imports, fileRootDir, rwsWorkspaceDir, importStorage = {
         const appRoot = this.getRWSWorkspaceDir ? this.getRWSRootDir() : importData[4];
 
         let importPath = processImportPath(originalImportPath, workspaceDir, appRoot, fileRootDir);            
-
-        let replacedScssContent = getStorage(importPath, _scss_fs.getCodeFromFile(importPath, workspaceDir).replace(/\/\*[\s\S]*?\*\//g, ''));
+      
+        let replacedScssContent = getStorage(importPath, _scss_fs.getCodeFromFile(importPath, workspaceDir, appRoot).replace(/\/\*[\s\S]*?\*\//g, ''));
 
         const recursiveImports = extractScssImports(replacedScssContent, workspaceDir, appRoot, importPath)[0];
 

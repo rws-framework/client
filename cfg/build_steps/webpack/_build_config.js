@@ -5,6 +5,7 @@ const { RWSConfigBuilder } = require('@rws-framework/console')
 const { rwsPath } = require('@rws-framework/console');
 const { _DEFAULT_CONFIG } = require('../../_default.cfg');
 
+
 async function getBuildConfig(rwsFrontBuildConfig, _packageDir){
     const BuildConfigurator = new RWSConfigBuilder(path.join(rwsPath.findPackageDir(process.cwd()), '.rws.json'), {..._DEFAULT_CONFIG, ...rwsFrontBuildConfig});
     const executionDir = rwsPath.relativize(BuildConfigurator.get('executionDir') || rwsFrontBuildConfig.executionDir || process.env.RWS_APP_ROOT || process.cwd(), _packageDir);
@@ -37,7 +38,7 @@ async function getBuildConfig(rwsFrontBuildConfig, _packageDir){
 
     const devRouteProxy = BuildConfigurator.get('devRouteProxy') || rwsFrontBuildConfig.devRouteProxy;
 
-    const tsConfig = BuildConfigurator.get('tsConfig') || rwsFrontBuildConfig.tsConfig;
+    const tsConfig = await (BuildConfigurator.get('tsConfig') || rwsFrontBuildConfig.tsConfig)(_packageDir, true, false);
 
     const rwsPlugins = {};
 

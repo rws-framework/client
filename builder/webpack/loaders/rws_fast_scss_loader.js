@@ -9,6 +9,7 @@ module.exports = async function(content) {
     const isDev = this._compiler.options.mode === 'development';    
     const saveFile = content.indexOf('@save') > -1; 
     const plugin = new RWSScssPlugin({
+        appRootDir: this.query?.appRootDir,
         rwsWorkspaceDir: this.query?.rwsWorkspaceDir
     }); 
     let fromTs = false;    

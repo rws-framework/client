@@ -61,6 +61,7 @@ module.exports = async function(content) {
     try { 
         if(tagName){                                   
             const [template, htmlFastImports, templateExists] = await LoadersHelper.getTemplate(filePath, this.addDependency, templateName, isDev);         
+
             const styles = await LoadersHelper.getStyles(filePath, this.query?.rwsWorkspaceDir, this.query?.appRootDir,this.addDependency, templateExists, stylesPath, isDev);  
 
             if(className){                
@@ -69,7 +70,7 @@ module.exports = async function(content) {
                 if(replacedViewDecoratorContent){
                     processedContent = `${template}\n${styles}\n${replacedViewDecoratorContent}`;
                 }                
-            }            
+            }
             
             processedContent = `${htmlFastImports ? htmlFastImports + '\n' : ''}${processedContent}`;
         }

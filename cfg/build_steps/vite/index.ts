@@ -1,3 +1,3 @@
-import { createViteConfig } from './vite_config';
+import { getBuildConfig } from './_build_config';
 
-export { createViteConfig };
+export { getBuildConfig };

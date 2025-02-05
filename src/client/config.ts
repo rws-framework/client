@@ -4,6 +4,7 @@ import { RWSClientInstance } from "../client";
 import { RWSPlugin, DefaultRWSPluginOptionsType } from "../plugins/_plugin";
 import RWSWindow, {loadRWSRichWindow } from '../types/RWSWindow';
 import deepmerge from 'deepmerge';
+import { IPluginSpawnOption } from "../types/IRWSPlugin";
 
 type RWSInfoType = { components: string[] };
 
@@ -72,15 +73,12 @@ function get(this: RWSClientInstance, key: string): any | null
     return null;
 }
 
-type PluginConstructor<T extends DefaultRWSPluginOptionsType> = new (options: T) => RWSPlugin<T>;
-type RWSPluginEntry<T extends DefaultRWSPluginOptionsType = DefaultRWSPluginOptionsType> = IStaticRWSPlugin<T>;
-
-function addPlugin<T  extends DefaultRWSPluginOptionsType>(this: RWSClientInstance, pluginEntry: RWSPluginEntry){
+function addPlugin<T  extends DefaultRWSPluginOptionsType>(this: RWSClientInstance, pluginEntry: IPluginSpawnOption<T>){
     const rwsWindow: RWSWindow = loadRWSRichWindow();
-    const pluginClass: PluginConstructor<T> = (Array.isArray(pluginEntry) ? pluginEntry[0] : pluginEntry) as unknown as PluginConstructor<T>;
+    const pluginClass: IStaticRWSPlugin<T> = pluginEntry.pluginEntry;
     const pluginOptions: T = (Array.isArray(pluginEntry) ? pluginEntry[1] : { enabled: true }) as T;
 
-    if(!Object.keys(rwsWindow.RWS.plugins).includes(pluginClass.name)){       
+    if(!Object.keys(rwsWindow.RWS.plugins).find(item => { item === pluginClass.name })){
         const pluginInstance: RWSPlugin<T> = new pluginClass(pluginOptions);
         this.plugins[pluginClass.name] = pluginInstance; 
         rwsWindow.RWS.plugins[pluginClass.name] = pluginInstance;

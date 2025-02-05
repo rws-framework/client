@@ -10,10 +10,12 @@ const chalk = require('chalk');
 const { timingCounterStart, timingCounterStop } = require('./_timing');
 const { rwsRuntimeHelper, rwsPath } = require('@rws-framework/console');
 
-function getRWSLoaders(packageDir, executionDir, tsConfig, appRootDir, entrypoint) {
+function getRWSLoaders(packageDir, executionDir, tsConfigData, appRootDir, entrypoint) {
   const scssLoader = path.join(packageDir, 'builder/webpack/loaders/rws_fast_scss_loader.js');
   const tsLoader = path.join(packageDir, 'builder/webpack/loaders/rws_fast_ts_loader.js');
   const htmlLoader = path.join(packageDir, 'builder/webpack/loaders/rws_fast_html_loader.js');
+
+  const tsConfigPath = tsConfigData.path;
 
   const loaders = [
     {
@@ -30,14 +32,20 @@ function getRWSLoaders(packageDir, executionDir, tsConfig, appRootDir, entrypoin
         {
           loader: 'ts-loader',
           options: {
-            ...tsConfig,
-            configFile: false,
+            configFile: tsConfigPath, 
+            compilerOptions: {
+                emitDecoratorMetadata: true,
+                experimentalDecorators: true,
+                target: "ES2018",
+                module: "commonjs"
+            },            
             transpileOnly: false, 
             logLevel: "info",
             logInfoToStdOut: true,
             context: executionDir,
             errorFormatter: (message, colors) => {
-              const messageText = message.message || message;
+              console.log({message});
+              const messageText = typeof message === 'object' ? JSON.stringify(message, null, 2) : message;
               return `\nTS Error: ${messageText}\n`;
             },         
           }
@@ -51,20 +59,25 @@ function getRWSLoaders(packageDir, executionDir, tsConfig, appRootDir, entrypoin
         }
       ],
       include: [
-        path.resolve(executionDir, 'src'),
-        path.resolve(packageDir, 'src'),
-        path.resolve(packageDir, 'foundation', 'rws-foundation.d.ts')
+        ...tsConfigData.includes.map(item => item.abs()),
+        path.resolve(packageDir, 'foundation', 'rws-foundation.d.ts')            
       ],
-      exclude: [        
-        /node_modules\/(?!\@rws-framework\/[A-Z0-9a-z])/,
+      exclude: [
+        ...tsConfigData.excludes.map(item => item.abs()),
         /\.debug\.ts$/,
         /\.d\.ts$/        
-      ],
+      ]     
     },
     {
       test: /\.scss$/i,
       use: [
-        scssLoader,
+        {
+          loader: scssLoader,
+          options: {
+            rwsWorkspaceDir: executionDir,
+            appRootDir
+          }
+        },
       ],
     },
   ];

@@ -1,8 +1,8 @@
 import chalk from 'chalk';
 import { RWSConfigBuilder, rwsPath } from '@rws-framework/console';
-import { _DEFAULT_CONFIG } from '../../_default.cfg';
+// import { _DEFAULT_CONFIG } from '../../_default.cfg';
 
-import { IRWSPlugin } from '../../../src/types/IRWSPlugin';
+import { IPluginSpawnOption, IRWSPlugin, IStaticRWSPlugin } from '../../../src/types/IRWSPlugin';
 
 interface IRWSViteConfig {
   executionDir: string;
@@ -24,25 +24,23 @@ interface IRWSViteConfig {
   devDebug?: any,
   devRouteProxy?: any,
   tsConfigPath: string,
-  rwsPlugins?: {
-    [key: string]: IRWSPlugin
-  },
+  rwsPlugins?: IPluginSpawnOption<any>[],
   _packageDir?: string,
   BuildConfigurator: RWSConfigBuilder<any>
 }
 
-async function getBuildConfig(rwsFrontBuildConfig): Promise<IRWSViteConfig>
+async function getBuildConfig(rwsFrontBuildConfig: Partial<IRWSViteConfig>): Promise<IRWSViteConfig>
 {
-    const BuildConfigurator = new RWSConfigBuilder(rwsPath.findPackageDir(process.cwd()) + '/.rws.json', {..._DEFAULT_CONFIG, ...rwsFrontBuildConfig});
+    const BuildConfigurator = new RWSConfigBuilder(rwsPath.findPackageDir(process.cwd()) + '/.rws.json', {...rwsFrontBuildConfig});
     const _packageDir = rwsPath.findPackageDir(process.cwd());
 
     const executionDir = rwsPath.relativize(BuildConfigurator.get('executionDir') || rwsFrontBuildConfig.executionDir || process.cwd(), _packageDir);
     const isWatcher = process.argv.includes('--watch') || false;  
 
-    const isDev = isWatcher ? true : (BuildConfigurator.get('dev', rwsFrontBuildConfig.dev) || false);
-    const isHotReload = BuildConfigurator.get('hot', rwsFrontBuildConfig.hot);
-    const isReport = BuildConfigurator.get('report', rwsFrontBuildConfig.report);
-    const isParted = BuildConfigurator.get('parted', rwsFrontBuildConfig.parted || false);
+    const isDev = isWatcher ? true : (BuildConfigurator.get('dev', rwsFrontBuildConfig.isDev) || false);
+    const isHotReload = BuildConfigurator.get('isHotReload', rwsFrontBuildConfig.isHotReload);
+    const isReport = BuildConfigurator.get('isReport', rwsFrontBuildConfig.isReport);
+    const isParted = BuildConfigurator.get('isParted', rwsFrontBuildConfig.isParted || false);
 
     const partedPrefix = BuildConfigurator.get('partedPrefix', rwsFrontBuildConfig.partedPrefix);
     const partedDirUrlPrefix = BuildConfigurator.get('partedDirUrlPrefix', rwsFrontBuildConfig.partedDirUrlPrefix);
@@ -53,7 +51,7 @@ async function getBuildConfig(rwsFrontBuildConfig): Promise<IRWSViteConfig>
 
     const outputFileName = BuildConfigurator.get('outputFileName') || rwsFrontBuildConfig.outputFileName;
     const publicDir = BuildConfigurator.get('publicDir') || rwsFrontBuildConfig.publicDir;
-    const serviceWorkerPath = BuildConfigurator.get('serviceWorker') || rwsFrontBuildConfig.serviceWorker;
+    const serviceWorkerPath = BuildConfigurator.get('serviceWorkerPath') || rwsFrontBuildConfig.serviceWorkerPath;
 
     const publicIndex = BuildConfigurator.get('publicIndex') || rwsFrontBuildConfig.publicIndex;
 
@@ -68,14 +66,14 @@ async function getBuildConfig(rwsFrontBuildConfig): Promise<IRWSViteConfig>
 
     const tsConfigPath = rwsPath.relativize(BuildConfigurator.get('tsConfigPath') || rwsFrontBuildConfig.tsConfigPath, executionDir);
 
-    const rwsPlugins = {};
+    const rwsPlugins: IPluginSpawnOption<any>[] = [];
 
-    if(rwsFrontBuildConfig.rwsPlugins){
-        for(const pluginEntry of rwsFrontBuildConfig.rwsPlugins){
-          const pluginBuilder = (await import(`${pluginEntry}`)).default;      
-          rwsPlugins[pluginEntry] = new pluginBuilder(BuildConfigurator, rwsFrontBuildConfig);
-        }
-      }
+    // if(rwsFrontBuildConfig.rwsPlugins){
+    //     for(const pluginEntry of Object.values(rwsFrontBuildConfig.rwsPlugins)){
+    //       const pluginBuilder = (await import(`${pluginEntry}`)).default as IStaticRWSPlugin<any>;      
+    //       rwsPlugins[pluginEntry] = new pluginBuilder(BuildConfigurator, rwsFrontBuildConfig);
+    //     }
+    //   }
 
     return {
         executionDir,

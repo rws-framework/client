@@ -3,62 +3,59 @@ import { Container } from "../components/_container";
 import RWSWindow, {loadRWSRichWindow } from '../types/RWSWindow';
 import IRWSUser from "../types/IRWSUser";
 import { RWSInfoType } from "../client/components";
-import { IRWSPlugin } from "../types/IRWSPlugin";
+import { IRWSPlugin, IStaticRWSPlugin } from "../types/IRWSPlugin";
 
-type DefaultRWSPluginOptionsType = { enabled: boolean };
-type PluginInfoType = { name: string }
+export type DefaultRWSPluginOptionsType = { enabled?: boolean };
+type PluginInfoType = { name: string };
 type PluginConstructor<T extends DefaultRWSPluginOptionsType> = new (options: T) => RWSPlugin<T>;
-abstract class RWSPlugin<PluginOptions extends DefaultRWSPluginOptionsType> implements IRWSPlugin{
+
+abstract class RWSPlugin<T extends DefaultRWSPluginOptionsType> extends IRWSPlugin<T> {
     protected isLoaded: boolean = false;
-    protected options: PluginOptions;
-    protected container: Container;    
-    protected window: RWSWindow;
+    protected options!: T;
+    protected container!: Container;    
+    protected window!: RWSWindow;
 
     static container: Container;    
     static window: RWSWindow;
 
-    constructor(options: PluginOptions = { enabled: false } as PluginOptions){
+    constructor(options: T = { enabled: true } as T) {
+        super();
         this.isLoaded = true;
         this.container = RWSPlugin.container;
         this.window = RWSPlugin.window;
         this.options = options;
     }
 
-    async onClientStart(): Promise<void>
-    {
-        
+    async onClientStart(): Promise<void> {
+        // Implementation
     }
 
-    async onPartedComponentsLoad(componentParts: RWSInfoType): Promise<void>
-    {
-        
+    async onPartedComponentsLoad(componentParts: RWSInfoType): Promise<void> {
+        // Implementation
     }
 
-    async onComponentsDeclare(): Promise<void>
-    {
-        
+    async onComponentsDeclare(): Promise<void> {
+        // Implementation
     }
 
-    async onSetUser(user: IRWSUser): Promise<void>{
-
+    async onSetUser(user: IRWSUser): Promise<void> {
+        // Implementation
     }
-
     
-    
-    static getPlugin<Plugin extends RWSPlugin<T>, T extends DefaultRWSPluginOptionsType = DefaultRWSPluginOptionsType>(pluginClass: PluginConstructor<T>): Plugin | null 
-    {
+    static getPlugin<P extends RWSPlugin<T>, T extends DefaultRWSPluginOptionsType = DefaultRWSPluginOptionsType>(
+        pluginClass: IStaticRWSPlugin<T>
+    ): P | null {
         const plugin = this.window.RWS.plugins[pluginClass.name];
-        return plugin ? plugin as Plugin : null;
+        return plugin ? plugin as P : null;
     }
 
-
-    static getAllPlugins(): RWSPlugin<DefaultRWSPluginOptionsType>[]
-    {
-        return Object.keys(this.window.RWS.plugins).map((key) => this.window.RWS.plugins[key]);
+    static getAllPlugins(): Array<RWSPlugin<DefaultRWSPluginOptionsType>> {
+        return Object.keys(this.window.RWS.plugins)
+            .map((key) => this.window.RWS.plugins[key]);
     }
 }
 
 RWSPlugin.window = loadRWSRichWindow();
 RWSPlugin.container = RWSContainer();
 
-export { RWSPlugin, DefaultRWSPluginOptionsType }
+export { RWSPlugin };

@@ -68,7 +68,7 @@ const RWSWebpackWrapper = async (appRoot, rwsFrontendConfig,  _packageDir) => {
   let optimConfig = null;
   let aliases = rwsFrontendConfig.aliases || {};
 
-  aliases = { ...aliases, ...loadAliases(_packageDir, path.resolve(_MAIN_PACKAGE, 'node_modules'), executionDir) }  
+  aliases = { ...aliases, ...loadAliases(_packageDir, tsConfig,path.resolve(_MAIN_PACKAGE, 'node_modules'), executionDir) }  
 
   // #SECTION PLUGIN STARTING HOOKS
 
@@ -115,7 +115,7 @@ const RWSWebpackWrapper = async (appRoot, rwsFrontendConfig,  _packageDir) => {
   }
 
   // #SECTION RWS WEBPACK BUILD
-  const cfgExport = createWebpackConfig({
+  const cfgExport = await createWebpackConfig({
     executionDir,
     _packageDir,
     isDev,

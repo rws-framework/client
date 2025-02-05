@@ -17,7 +17,7 @@ module.exports = {
         plugins: rwsPlugins
         });
 
-        console.log(chalk.blue('\nTSCONFIG:'), util.inspect(tsConfig, {
+        console.log(chalk.blue('\nTSCONFIG:'), util.inspect(tsConfig.config, {
             depth: null,
             colors: true,
             maxArrayLength: null

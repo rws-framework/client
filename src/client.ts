@@ -1,4 +1,4 @@
-import IRWSConfig, { RWSPluginEntry } from './types/IRWSConfig';
+import IRWSConfig from './types/IRWSConfig';
 
 import RWSNotify from './types/RWSNotify';
 
@@ -74,9 +74,9 @@ class RWSClient {
         }        
     }
 
-    addPlugin<T extends DefaultRWSPluginOptionsType>(pluginEntry: IStaticRWSPlugin)
+    addPlugin<T extends DefaultRWSPluginOptionsType>(pluginEntry: IStaticRWSPlugin<T>, options?: T)
     {        
-        this.config.plugins.push(pluginEntry);
+        this.config.plugins.push({pluginEntry, options});
     }
 
     async setup(config: IRWSConfig = {}): Promise<IRWSConfig> {

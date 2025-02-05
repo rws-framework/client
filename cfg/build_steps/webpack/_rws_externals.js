@@ -12,7 +12,7 @@ const _defaultOpts = {
   }
 }
 
-const externals = (pkgPath, declaredCodeBase, nodeModules, automatedChunks, externalOptions = _defaultOpts) => ({context, request}, callback) => {
+const externals = (declaredCodeBase, nodeModules, automatedChunks, externalOptions = _defaultOpts) => ({context, request}, callback) => {
     let theOptions = _defaultOpts;
 
     if(externalOptions !== null){      
@@ -25,18 +25,18 @@ const externals = (pkgPath, declaredCodeBase, nodeModules, automatedChunks, exte
       // /css-loader/,
       /tslib/,
       /reflect-metadata/, 
-      /\@microsoft\/fast-foundation\/.*/     
+      /\@microsoft\/fast-foundation\/.*/
     ]
 
     const enforced = [
       /entities/,      
       /\@microsoft\/fast-foundation\/.*\/di/,
-      /\@microsoft\/fast-foundation\/.*\/foundation-element/
+      /\@microsoft\/fast-foundation\/.*\/foundation-element/,      
     ]
 
     const frontendDirs = [
       codeBase,
-      pkgPath
+      path.resolve(__dirname,'..','..','..')
     ];        
 
     const inFrontendContext = frontendDirs.some(dir => context.startsWith(dir)) || 
