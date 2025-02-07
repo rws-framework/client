@@ -21,15 +21,13 @@ const externals = (declaredCodeBase, nodeModules, automatedChunks, externalOptio
 
     const codeBase = path.resolve(declaredCodeBase);        
 
-    const ignored = [
-      // /css-loader/,
+    const ignored = [      
       /tslib/,
       /reflect-metadata/, 
-      /\@microsoft\/fast-foundation\/.*/
+      /\@microsoft\/fast-foundation\/.*/,      
     ]
 
-    const enforced = [
-      /entities/,      
+    const enforced = [      
       /\@microsoft\/fast-foundation\/.*\/di/,
       /\@microsoft\/fast-foundation\/.*\/foundation-element/,      
     ]
@@ -38,6 +36,8 @@ const externals = (declaredCodeBase, nodeModules, automatedChunks, externalOptio
       codeBase,
       path.resolve(__dirname,'..','..','..')
     ];        
+
+    console.log({frontendDirs})
 
     const inFrontendContext = frontendDirs.some(dir => context.startsWith(dir)) || 
         externalOptions._vars.frontendRequestContextCache.some(package => context.indexOf(package.request) > -1)

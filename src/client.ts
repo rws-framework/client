@@ -25,14 +25,6 @@ import ConfigHelper from './client/config';
 import { DefaultRWSPluginOptionsType, RWSPlugin } from './plugins/_plugin';
 import { IStaticRWSPlugin } from './types/IRWSPlugin'
 
-interface IHotModule extends NodeModule {
-    hot?: {
-        accept(dependencies: string[], callback?: (updatedDependencies: string[]) => void): void;
-        accept(dependency: string, callback?: () => void): void;
-        accept(errHandler?: (err: Error) => void): void;
-        dispose(callback: (data: any) => void): void;
-    }
-}
 
 type RWSEventListener = (event: CustomEvent) => void;
 
@@ -210,4 +202,4 @@ class RWSClient {
 }
 
 export default DI.createInterface<RWSClient>(x => x.singleton(RWSClient));
-export { IHotModule, RWSClient as RWSClientInstance };
+export {  RWSClient as RWSClientInstance };

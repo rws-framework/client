@@ -12,7 +12,10 @@ function loadAliases(packageDir, tsConfig, nodeModulesPath, executionDir){
     return {        
         ...tsPaths,
         '@rws-framework/foundation': path.resolve(packageDir, 'foundation', 'rws-foundation.js'),
-        '@rws-framework/foundation/*': path.resolve(packageDir, 'foundation', '*')
+        '@rws-framework/foundation/*': path.resolve(packageDir, 'foundation', '*'),
+        // 'entities/lib/maps/entities.json': path.resolve(nodeModulesPath, 'entities/lib/maps/entities.json'),
+        // 'entities/lib/maps/legacy.json': path.resolve(nodeModulesPath, 'entities/lib/maps/legacy.json'),
+        // 'entities/lib/maps/xml.json': path.resolve(nodeModulesPath, 'entities/lib/maps/xml.json')
     }
 }
 

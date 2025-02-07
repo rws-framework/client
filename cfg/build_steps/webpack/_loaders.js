@@ -19,6 +19,13 @@ function getRWSLoaders(packageDir, executionDir, tsConfigData, appRootDir, entry
 
   const loaders = [
     {
+      test: /\.json$/,
+      type: 'javascript/auto',
+      include: [
+        path.resolve(appRootDir, 'node_modules/entities/lib/maps')
+      ],
+    },
+    {
       test: /\.html$/,
       use: [
         {
