@@ -53,7 +53,6 @@ export const backend = {
                     return subRoute;
                 })];
 
-                console.log({routes});
             } else {
                 // Handle the case where item is of type IHTTProute
                 routes.push(item as IHTTProute);
