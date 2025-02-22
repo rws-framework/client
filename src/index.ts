@@ -30,12 +30,31 @@ import type { IAssetShowOptions } from './components/_component';
 import RWSContainer from './components/_container';
 
 import type { RWSDecoratorOptions } from './components/_decorator';
+import type { IKDBTypeInfo, IKDBTypesResponse } from './types/IBackendCore';
 
 import {  RWSIgnore, RWSInject, RWSView } from './components/_decorator';
 
 import { declareRWSComponents } from './components';
 
 export default RWSClient;
+
+export type {
+    IKDBTypeInfo, IKDBTypesResponse,
+    NotifyUiType,
+    NotifyLogType,
+    IBackendRoute as IRWSBackendRoute,
+    RWSDecoratorOptions as IRWSDecoratorOptions,
+    IHTTProute as IRWSHttpRoute,
+    IPrefixedHTTProutes as IRWSPrefixedHTTProutes,    
+    IAssetShowOptions as IRWSAssetShowOptions,
+    IRWSConfig,
+    IRWSUser,
+    TagsProcessorType,
+    HTMLTagTransformerType,
+    HTMLTag,
+    HTMLAttributes
+}
+
 export { 
     RWSClient,
     RWSClientInstance,
@@ -43,11 +62,7 @@ export {
     RWSPlugin,
     IPluginSpawnOption,
     IRWSPlugin, IStaticRWSPlugin,
-    DefaultRWSPluginOptionsType,
-    
-    NotifyUiType,
-    NotifyLogType,
-
+    DefaultRWSPluginOptionsType,    
     ApiServiceInstance,
     ApiService,    
     UtilsServiceInstance,    
@@ -63,18 +78,7 @@ export {
     ServiceWorkerService,
 
     RWSNotify,
-    IBackendRoute as IRWSBackendRoute,
-    RWSDecoratorOptions as IRWSDecoratorOptions,
-    IHTTProute as IRWSHttpRoute,
-    IPrefixedHTTProutes as IRWSPrefixedHTTProutes,    
-    IAssetShowOptions as IRWSAssetShowOptions,
-    IRWSConfig,
-    IRWSUser,
-    TagsProcessorType,
-    HTMLTagTransformerType,
-    HTMLTag,
-    HTMLAttributes,
-         
+
     RWSView,
     sanitizedAttr,
     RWSIgnore,
