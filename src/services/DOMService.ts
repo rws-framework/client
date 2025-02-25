@@ -1,6 +1,6 @@
 import RWSService from './_service';
 import { DOM } from '@microsoft/fast-element';
-import htmlSanitizer, { Transformer, IOptions } from 'sanitize-html';
+// import htmlSanitizer, { Transformer, IOptions } from 'sanitize-html';
 
 type TagsProcessorType = { [tagName: string]: string | Transformer };
 type DOMOutputType<T extends Element> = NodeListOf<T> | T | null;
@@ -67,23 +67,7 @@ class DOMService extends RWSService {
         });
 
         return sanitizedText;
-    }
-
-    sanitizeHTML(
-        line: string, 
-        allowedHTMLTags: string[] = null,         
-        sanitizeOptions: IOptions = {})
-    {
-        const output: string = line.trim(); 
-        
-        if(allowedHTMLTags){
-            sanitizeOptions.allowedTags = allowedHTMLTags;
-        }     
-
-        const sanitized = htmlSanitizer(output, sanitizeOptions);
-
-        return sanitized;
-    }
+    }   
 
     async onDOMLoad(): Promise<void>
     {

@@ -13,7 +13,7 @@ import type { IBackendRoute, IHTTProute, IPrefixedHTTProutes } from './services/
 
 import UtilsService, {UtilsServiceInstance} from './services/UtilsService';
 import ServiceWorkerService, { ServiceWorkerServiceInstance } from './services/ServiceWorkerService';
-import { sanitizedAttr } from './components/_attrs/sanitize-html';
+// import { sanitizedAttr } from './components/_attrs/sanitize-html';
 import { ngAttr } from './components/_attrs/angular-attr';
 import { externalObservable } from './components/_attrs/external-observable';
 import { externalAttr } from './components/_attrs/external-attr';
@@ -80,7 +80,7 @@ export {
     RWSNotify,
 
     RWSView,
-    sanitizedAttr,
+    // sanitizedAttr,
     RWSIgnore,
     RWSInject,    
     observable,
