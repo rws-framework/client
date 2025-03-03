@@ -240,6 +240,8 @@ abstract class RWSViewComponent extends FoundationElement implements IRWSViewCom
 
 export default RWSViewComponent;
 
+export { RWSViewComponent };
+
 export type {
     IAssetShowOptions,
     IRWSViewComponent

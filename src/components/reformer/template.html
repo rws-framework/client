@@ -1,5 +1,7 @@
 <div class="re-former-container">
     ${T.repeat(x => x.modelTypes.data.types, T.html`<div class="form-field">
-        ${T.while(x => x.type === 'String', T.html`<re-former-text :setForm="${x => x.setForm.bind(x)}" name="${x => x.fieldName}"></re-former-text>`)}
+        ${T.when(x => x.type === 'String', T.html`
+            <re-former-text :setForm="${x => x.setForm.bind(x)}" name="${x => x.fieldName}"></re-former-text>
+        `)}
     </div>`)}    
 </div>

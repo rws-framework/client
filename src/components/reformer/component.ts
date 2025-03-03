@@ -1,4 +1,7 @@
-import { RWSView, RWSViewComponent, observable, attr, IKDBTypesResponse } from '../../index';
+import { observable, attr } from '@microsoft/fast-element';
+import { IKDBTypesResponse } from '../../types/IBackendCore';
+import { RWSViewComponent} from '../_component';
+import { RWSView} from '../_decorator';
 import { ReFormerText } from './fields/text/component';
 
 ReFormerText;

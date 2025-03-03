@@ -1,4 +1,6 @@
-import { RWSView, RWSViewComponent, observable, attr } from '../../index';
+import { observable, attr } from '@microsoft/fast-element';
+import { RWSView } from '../_decorator';
+import { RWSViewComponent } from '../_component';
 
 @RWSView('rws-uploader')
 class RWSUploader extends RWSViewComponent {
