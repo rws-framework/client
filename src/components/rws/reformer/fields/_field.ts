@@ -1,6 +1,6 @@
 import { observable, attr } from "@microsoft/fast-element";
-import RWSViewComponent from "../../_component";
-import { IReFormerField } from "../../../types/IReFormerField";
+import RWSViewComponent from "../../../_component";
+import { IReFormerField } from "../../../../types/IReFormerField";
 
 export abstract class ReFormerFieldComponent extends RWSViewComponent implements IReFormerField  {
     @attr name: string;

@@ -1,5 +1,5 @@
-import { RWSView } from '../_decorator';
-import { RWSViewComponent } from '../_component';
+import { RWSView } from '../../_decorator';
+import { RWSViewComponent } from '../../_component';
 
 @RWSView('the-loader')
 class RWSLoader extends RWSViewComponent {

@@ -1,0 +1,11 @@
+<div class="rws-modal">
+    <div @click="${ (x, c) => x.closeModal() }" class="backdrop"></div>
+    <div class="rws-modal-wrapper">
+      <div class="rws-modal-header">
+        <sl-button @click="${ (x, c) => x.closeModal() }" variant="secondary" >Close</sl-button>  
+      </div>
+      <div class="rws-modal-body">
+        <slot></slot>
+      </div>
+  </div>
+</div>

@@ -1,4 +1,4 @@
-import { RWSView} from '../../../_decorator';
+import { RWSView} from '../../../../_decorator';
 import { ReFormerFieldComponent } from '../_field';
 
 @RWSView('reformer-text')

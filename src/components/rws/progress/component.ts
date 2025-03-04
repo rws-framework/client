@@ -1,6 +1,6 @@
 import { observable, attr, nullableNumberConverter } from '@microsoft/fast-element';
-import { RWSView } from '../_decorator';
-import { RWSViewComponent } from '../_component';
+import { RWSView } from '../../_decorator';
+import { RWSViewComponent } from '../../_component';
 
 @RWSView('rws-progress', { debugPackaging: false })
 class RWSProgress extends RWSViewComponent {
