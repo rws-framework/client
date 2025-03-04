@@ -1,4 +1,4 @@
-import { observable } from '@microsoft/fast-element';
+import { observable, attr } from '@microsoft/fast-element';
 import { RWSViewComponent} from '../../_component';
 import { RWSView} from '../../_decorator';
 
@@ -18,7 +18,8 @@ export type ActionType = {
 }
  
 @RWSView('rws-table')
-class RWSTable extends RWSViewComponent {      
+class RWSTable extends RWSViewComponent {     
+    @attr emptyLabel: string = 'No records'; 
     @observable columns: IFlexTableColumn[] = [];
 
     @observable dataColumns: IFlexTableColumn[] = [];

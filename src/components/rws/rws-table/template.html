@@ -19,5 +19,9 @@
           </div>`)}
       </div>
   `)}
+
+  ${T.when(x => !x.data.length, T.html`<div class="flex-table-row flex-table-empty table-body">
+    <div class="flex-table-cell full-row"><strong>${ x => x.emptyLabel }</strong></div>
+  </div>`)}
   
 </div>

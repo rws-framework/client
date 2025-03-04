@@ -27,6 +27,14 @@
         background-color: #f1f5f9;
       }
     }
+    
+    &.flex-table-empty {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100px;
+      background-color: #f8fafc;
+    }
   }
 
   .flex-table-cell {
@@ -48,5 +56,18 @@
         margin-right: 0;
       }
     }
+
+    // Add styles for the full-row cell
+    &.full-row {
+      flex: 1 1 100%;
+      text-align: center;
+      color: #64748b; // Slate-500 color
+      padding: 24px 16px;
+      
+      strong {
+        font-weight: 600;
+      }
+    }
   }
 }
+
