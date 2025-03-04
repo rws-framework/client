@@ -29,8 +29,6 @@ class RWSResourceFormComponent extends RWSViewComponent {
         for(const type of this.dbModelData.data.types){
             this.formOrdering.push(type as unknown as IReFormerMassOrdering);
         }
-
-        console.log('ordering', this.formOrdering);
     }
 }
 

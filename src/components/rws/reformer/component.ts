@@ -27,7 +27,6 @@ class ReFormer extends RWSViewComponent {
 
     modelTypesChanged(oldVal:IKDBTypesResponse, newVal: IKDBTypesResponse)
     {
-        console.log({newVal})
         if(newVal){
             this.formFields = newVal.data.types.filter((item) => !['id', 'created_at', 'updated_at'].includes(item.fieldName))
         }
