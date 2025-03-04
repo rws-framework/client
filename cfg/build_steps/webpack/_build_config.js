@@ -12,9 +12,10 @@ async function getBuildConfig(rwsFrontBuildConfig, _packageDir){
     const isWatcher = process.argv.includes('--watch') || false;  
 
     const isDev = isWatcher ? true : (BuildConfigurator.get('dev', rwsFrontBuildConfig.dev) || false);
-    const isHotReload = BuildConfigurator.get('hotReload', rwsFrontBuildConfig.hotReload);
     const isReport = BuildConfigurator.get('pkgReport', rwsFrontBuildConfig.pkgReport);
     const isParted = BuildConfigurator.get('parted', rwsFrontBuildConfig.parted || false);
+    const hotReload = BuildConfigurator.get('hotReload', rwsFrontBuildConfig.hotReload || false);
+    const hotReloadPort = BuildConfigurator.get('hotReloadtPort', rwsFrontBuildConfig.hotReloadPort || 1030);
 
     const partedPrefix = BuildConfigurator.get('partedPrefix', rwsFrontBuildConfig.partedPrefix);
     const partedDirUrlPrefix = BuildConfigurator.get('partedDirUrlPrefix', rwsFrontBuildConfig.partedDirUrlPrefix);
@@ -53,7 +54,6 @@ async function getBuildConfig(rwsFrontBuildConfig, _packageDir){
         executionDir,
         isWatcher,
         isDev,
-        isHotReload,
         isReport,
         isParted,
         partedPrefix,
@@ -70,7 +70,9 @@ async function getBuildConfig(rwsFrontBuildConfig, _packageDir){
         devRouteProxy,
         tsConfig,
         rwsPlugins,        
-        BuildConfigurator
+        BuildConfigurator,
+        hotReload,
+        hotReloadPort
     }
 }
 

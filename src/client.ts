@@ -22,6 +22,7 @@ import TheRWSService from './services/_service';
 import ComponentHelper, { ComponentHelperStatic, RWSInfoType } from './client/components';
 import ServicesHelper from './client/services';
 import ConfigHelper from './client/config';
+import HotReloadHelper, { IHotReloadCfg, _DEFAULT_HR_PORT } from './client/hotReload';
 import { DefaultRWSPluginOptionsType, RWSPlugin } from './plugins/_plugin';
 import { IStaticRWSPlugin } from './types/IRWSPlugin'
 
@@ -38,10 +39,13 @@ class RWSClient {
     protected devStorage: { [key: string]: any } = {};    
     protected customServices: { [serviceName: string]: TheRWSService} = {};
     protected defaultServices: { [serviceName: string]: TheRWSService} = {};
+    protected hrSetup: IHotReloadCfg = { enabled: false, port: _DEFAULT_HR_PORT }
 
     private componentHelper = ComponentHelper.bind(this)();
     private servicesHelper = ServicesHelper.bind(this)();
     private configHelper = ConfigHelper.bind(this)();
+    private hotReloadHelper = HotReloadHelper.bind(this)();
+
 
     protected initCallback: () => Promise<void> = async () => { };    
 

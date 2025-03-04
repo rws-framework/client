@@ -78,16 +78,6 @@ function addStartPlugins(rwsFrontendConfig, BuildConfigurator, devDebug, isHotRe
         ...getPackageModPlugins()
     ]);
 
-    if (isHotReload) {
-        if (!publicDir) {
-            throw new Error('No public dir set')
-        }
-
-        RWS_WEBPACK_PLUGINS_BAG.add(new HtmlWebpackPlugin({
-            template: path.join(publicDir, '/', publicIndex),
-        }));
-    }
-
     const overridePlugins = rwsFrontendConfig.plugins || []
 
     RWS_WEBPACK_PLUGINS_BAG.add(overridePlugins);

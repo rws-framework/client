@@ -89,7 +89,6 @@ function getRWSLoaders(packageDir, executionDir, tsConfigData, appRootDir, entry
     },
   ];
 
-
   return loaders;
 }
 

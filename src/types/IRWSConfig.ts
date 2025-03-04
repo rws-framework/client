@@ -22,6 +22,8 @@ export default interface IRWSConfig {
     rwsDefines?: {[key: string]: any}
     partedFileDir?: string
     partedPrefix?: string
+    hotReload?: boolean,
+    hotReloadPort?: number,
     plugins?: IPluginSpawnOption<any>[]
     routing_enabled?: boolean
     _noLoad?: boolean    

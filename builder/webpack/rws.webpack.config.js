@@ -28,7 +28,6 @@ const RWSWebpackWrapper = async (appRoot, rwsFrontendConfig,  _packageDir) => {
     executionDir,
     isWatcher,
     isDev,
-    isHotReload,
     isReport,
     isParted,
     partedPrefix,
@@ -45,7 +44,9 @@ const RWSWebpackWrapper = async (appRoot, rwsFrontendConfig,  _packageDir) => {
     devRouteProxy,
     tsConfig,
     rwsPlugins,
-    BuildConfigurator
+    BuildConfigurator,
+    hotReload,
+    hotReloadPort
   } = await getBuildConfig(rwsFrontendConfig, _packageDir);
 
   timeLog({ devDebug });
@@ -58,7 +59,7 @@ const RWSWebpackWrapper = async (appRoot, rwsFrontendConfig,  _packageDir) => {
   buildInfo.start(executionDir, tsConfig, outputDir, isDev, publicDir, isParted, partedPrefix, partedDirUrlPrefix, devTools, rwsFrontendConfig.rwsPlugins);
 
   // #SECTION INIT PLUGINS && ENV VARS DEFINES
-  addStartPlugins(rwsFrontendConfig, BuildConfigurator, devDebug, isHotReload, isReport);
+  addStartPlugins(rwsFrontendConfig, BuildConfigurator, devDebug, hotReload, isReport);
 
   const WEBPACK_AFTER_ACTIONS = rwsFrontendConfig.actions || [];
   const WEBPACK_AFTER_ERROR_ACTIONS = rwsFrontendConfig.error_actions || [];
@@ -66,7 +67,7 @@ const RWSWebpackWrapper = async (appRoot, rwsFrontendConfig,  _packageDir) => {
   const modules_setup = [path.join(_packageDir, 'node_modules'), path.join(executionDir, 'node_modules'), path.join(tools.findRootWorkspacePath(appRoot), 'node_modules')];
   let optimConfig = null;
   let aliases = rwsFrontendConfig.aliases || {};
-  aliases = { ...aliases, ...loadAliases(_packageDir, tsConfig,path.resolve(_MAIN_PACKAGE, 'node_modules'), executionDir) }  
+  aliases = { ...aliases, ...(await loadAliases(_packageDir, tsConfig,path.resolve(_MAIN_PACKAGE, 'node_modules'), executionDir))}  
 
   // #SECTION PLUGIN STARTING HOOKS
 
@@ -131,7 +132,9 @@ const RWSWebpackWrapper = async (appRoot, rwsFrontendConfig,  _packageDir) => {
     rwsExternals,
     devExternalsVars,
     appRootDir: appRoot,
-    entrypoint: rwsFrontendConfig.entrypoint
+    entrypoint: rwsFrontendConfig.entrypoint,
+    hotReload,
+    hotReloadPort
 });  
 
   if (optimConfig) {
@@ -144,11 +147,6 @@ const RWSWebpackWrapper = async (appRoot, rwsFrontendConfig,  _packageDir) => {
     const plugin = rwsPlugins[pluginKey];
     await plugin.onBuild(cfgExport);
   }
-
-  if (isDev) {
-    // #SECTION RWS DEV SERVERS
-    webpackDevServer(BuildConfigurator, rwsFrontendConfig, cfgExport);
-  }  
 
   return cfgExport;
 }

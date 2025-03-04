@@ -1,5 +1,6 @@
+const { getRWSHotReloadSetup } = require('./_hot_reload');
 const { getRWSLoaders } = require('./_loaders');
-const path = require('path');
+const webpack = require('webpack');
 
 
 async function createWebpackConfig({
@@ -20,8 +21,14 @@ async function createWebpackConfig({
     rwsExternals,
     devExternalsVars,
     appRootDir,
-    entrypoint
+    entrypoint,
+    hotReload,
+    hotReloadPort
 }) { 
+
+    if(hotReload){
+        WEBPACK_PLUGINS.push(new webpack.HotModuleReplacementPlugin());
+    }
 
     return {
         context: executionDir,
@@ -47,6 +54,7 @@ async function createWebpackConfig({
                 path: false
             }
         },
+        devServer: hotReload ? getRWSHotReloadSetup(hotReloadPort, outputDir) : null,
         module: {
             rules: getRWSLoaders(_packageDir, executionDir, tsConfig, appRootDir, entrypoint),
         },

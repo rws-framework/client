@@ -6,7 +6,7 @@ import RWSWindow, {loadRWSRichWindow } from '../types/RWSWindow';
 import deepmerge from 'deepmerge';
 import { IPluginSpawnOption } from "../types/IRWSPlugin";
 
-type RWSInfoType = { components: string[] };
+import { _DEFAULT_HR_PORT } from './hotReload';
 
 function getUser(this: RWSClientInstance): IRWSUser {
 
@@ -96,6 +96,12 @@ async function setup(this: RWSClientInstance, config: IRWSConfig = {}): Promise<
 
     this.appConfig.mergeConfig(this.config);    
 
+    if (this.appConfig.get('hotReload') === true) {
+        if(!this.appConfig.get('hotReloadPort')){
+            this.appConfig.set('hotReloadPort', _DEFAULT_HR_PORT)
+        }
+    }
+
     if(this.config.plugins){                
         for (const pluginEntry of this.config.plugins){
             addPlugin.bind(this)(pluginEntry);
@@ -144,6 +150,12 @@ async function start(this: RWSClientInstance, config: IRWSConfig = {}): Promise<
 
     for (const plugin of RWSPlugin.getAllPlugins()){                
         await plugin.onClientStart();
+    }
+
+    if(this.appConfig.get('hotReload')){
+        if (module.hot) {
+            module.hot.accept();
+        }
     }
 
     return this;

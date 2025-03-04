@@ -17,8 +17,6 @@ function processEnvDefines(BuildConfigurator, config, devDebug) {
         _rws_defines = { ..._rws_defines, ...stringifiedDefines }
     }
     
-    console.log({_rws_defines});
-
     return _rws_defines;
 }
 
