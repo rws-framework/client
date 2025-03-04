@@ -1,4 +1,4 @@
-import { IKDBTypeInfo, IKDBTypesResponse } from '../../../types/IBackendCore';
+import { IKDBTypesResponse } from '../../../types/IBackendCore';
 import { observable, attr } from '@microsoft/fast-element';
 import { RWSView } from '../../_decorator';
 import { RWSViewComponent } from '../../_component';
@@ -15,38 +15,36 @@ RWSResourceFormComponent;
 class RWSApiResource extends RWSViewComponent {    
     @attr resource: string; 
     @attr resourceLabel: string = null;
-     
+
+    @attr createEntryLabel = 'Create entry';
+    @attr listEntryLabel = 'Entries list';
+
+    @attr createEnabled = 'true'; 
     @attr emptyLabel: string = 'No records';
 
     @observable dbModelData: IKDBTypesResponse = null;
-    @observable resourceList: any[] = [];
-    @observable columns: IFlexTableColumn[] = [];
 
+    @observable viewType: 'list' | 'form' = 'list';
+    
     @observable fields: string[] = [];
     @observable extraFormatters: {[header_key: string] : IExtraColumnFormatter} = {};  
     @observable headerTranslations: {[header_key: string] : string} = {};  
 
-    @observable actions: ActionType[] = []; 
+    @observable listActions: ActionType[] = []; 
+
+    @observable back: (resource: any) => Promise<void> = async (resource: any) => {
+        this.viewType = 'list';
+    };
 
     async connectedCallback(): Promise<void> 
     {
         super.connectedCallback();
+        this.dbModelData = await this.apiService.getResource(this.resource);          
+    }
 
-        this.dbModelData = await this.apiService.getResource(this.resource);  
-        this.resourceList = await this.apiService.back.get(`${this.resource}:list`);
-
-        const makeColumns: IFlexTableColumn[] = [];
-
-        for(const key in Object.keys(this.dbModelData.data.types)){
-            const responseObject: IKDBTypeInfo = this.dbModelData.data.types[key];
-
-            makeColumns.push({
-                key: responseObject.fieldName,
-                header: responseObject.fieldName,                
-            });
-        }
-
-        this.columns = makeColumns;
+    toggleForm()
+    {
+        this.viewType = this.viewType === 'form' ? 'list' : 'form';
     }
 }
 
