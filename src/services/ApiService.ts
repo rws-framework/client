@@ -45,7 +45,7 @@ type IBackendRoute = IHTTProute | IPrefixedHTTProutes;
 
 class ApiService extends TheService {
     static _DEFAULT: boolean = true;
-    private token?: string;    
+    public token?: string;    
 
     constructor(@ConfigService public config: ConfigServiceInstance) {
         super();        
@@ -60,7 +60,7 @@ class ApiService extends TheService {
 
     public async isGetTargetReachable(url: string, options: IAPIOptions = {}): Promise<boolean> {
         try {    
-            return !!(await calls.pureGet(url, options, this.token));
+            return !!(await calls.pureGet.bind(this)(url, options));
         } catch (error) {
             return false;
         }
@@ -89,16 +89,16 @@ class ApiService extends TheService {
     public delete = calls.delete;
 
     public back = {
-        get: <T>(routeName: string, options?: IAPIOptions): Promise<T> => calls.get(backend.getBackendUrl.bind(this)(routeName, options?.routeParams), options, this.token),
-        post: <T, P extends object = object>(routeName: string, payload?: P, options?: IAPIOptions): Promise<T> => calls.post(backend.getBackendUrl.bind(this)(routeName, options?.routeParams), payload, options, this.token),
-        put: <T, P extends object = object>(routeName: string, payload: P, options?: IAPIOptions): Promise<T> => calls.put(backend.getBackendUrl.bind(this)(routeName, options?.routeParams), payload, options, this.token),
-        delete: <T>(routeName: string, options?: IAPIOptions): Promise<T> => calls.delete(backend.getBackendUrl.bind(this)(routeName, options?.routeParams), options, this.token),
-        uploadFile: (routeName: string, file: File, onProgress: (progress: number) => void, options: IAPIOptions = {}, payload: any = {}): Promise<UploadResponse> => this.uploadFile(backend.getBackendUrl.bind(this)(routeName, options?.routeParams), file, onProgress, payload),
+        get: async <T>(routeName: string, options?: IAPIOptions, token?: string): Promise<T> => calls.get.bind(this)(backend.getBackendUrl.bind(this)(routeName, options?.routeParams), options) as Promise<T>,
+        post: async <T, P extends object = object>(routeName: string, payload?: P, options?: IAPIOptions): Promise<T> => calls.post.bind(this)(backend.getBackendUrl.bind(this)(routeName, options?.routeParams), payload, options) as Promise<T>,
+        put: async <T, P extends object = object>(routeName: string, payload: P, options?: IAPIOptions): Promise<T> => calls.put.bind(this)(backend.getBackendUrl.bind(this)(routeName, options?.routeParams), payload, options) as Promise<T>,
+        delete: async <T>(routeName: string, options?: IAPIOptions): Promise<T> => calls.delete.bind(this)(backend.getBackendUrl.bind(this)(routeName, options?.routeParams), options) as Promise<T>,
+        uploadFile: async (routeName: string, file: File, onProgress: (progress: number) => void, options: IAPIOptions = {}, payload: any = {}): Promise<UploadResponse> => this.uploadFile(backend.getBackendUrl.bind(this)(routeName, options?.routeParams), file, onProgress, payload),
     };
 
     async getResource(resourceName: string): Promise<IKDBTypesResponse>
     {        
-        return calls.get(`${this.config.get('backendUrl')}${this.config.get('apiPrefix') || ''}/api/rws/resource/${resourceName}`)
+        return calls.get.bind(this)(`${this.config.get('backendUrl')}${this.config.get('apiPrefix') || ''}/api/rws/resource/${resourceName}`) as Promise<IKDBTypesResponse>
     }
 }
 

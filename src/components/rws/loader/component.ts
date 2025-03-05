@@ -1,8 +1,9 @@
 import { RWSView } from '../../_decorator';
 import { RWSViewComponent } from '../../_component';
+import { attr } from '@microsoft/fast-element';
 
-@RWSView('the-loader')
-class RWSLoader extends RWSViewComponent {
+@RWSView('rws-loader')
+class RWSLoader extends RWSViewComponent {    
     connectedCallback(): void {
         super.connectedCallback();
     }

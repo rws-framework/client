@@ -252,7 +252,7 @@ async function getTemplate(filePath, addDependency, templateName = null, isDev =
 
   if (templateExists) {
     const templateContent = fs.readFileSync(templatePath, 'utf-8').replace(/<!--[\s\S]*?-->/g, '');
-    htmlFastImports = `import * as T from '@microsoft/fast-element';\nimport './${templateName}.html';\n`;
+    htmlFastImports = `import * as T from '@microsoft/fast-element';\nimport { html, css, ref, when, repeat, slotted, children } from '@microsoft/fast-element'; \nimport './${templateName}.html';\n`;
     template = `                
 //@ts-ignore                
 let rwsTemplate: any = T.html\`${templateContent}\`;

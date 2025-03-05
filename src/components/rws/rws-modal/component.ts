@@ -5,8 +5,13 @@ import { RWSView} from '../../_decorator';
 @RWSView('rws-modal')
 class RWSModal extends RWSViewComponent {      
     @observable closeModal: () => void
+    @observable onShowModal: ($: ShadowRoot) => void
+
     connectedCallback(): void {
-        super.connectedCallback();        
+        super.connectedCallback(); 
+        if(this.onShowModal){
+            this.onShowModal(this.shadowRoot);
+        }       
     }
 }
 

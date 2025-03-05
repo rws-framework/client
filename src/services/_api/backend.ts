@@ -2,7 +2,7 @@ import { ApiServiceInstance, IBackendRoute, IHTTProute } from "../ApiService";
 import { ConfigServiceInstance } from "../ConfigService";
 
 export const backend = {
-    getBackendUrl(this: ApiServiceInstance, routeName: string, params: {[key: string]: string} = {})
+    getBackendUrl(this: ApiServiceInstance, routeName: string, params: {[key: string]: string} = {}): string
     {       
         const config = this.config;
         const routesPackage = config.get('backendRoutes');
