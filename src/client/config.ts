@@ -152,11 +152,11 @@ async function start(this: RWSClientInstance, config: IRWSConfig = {}): Promise<
         await plugin.onClientStart();
     }
 
-    if(this.appConfig.get('hotReload')){
-        if (module.hot) {
-            module.hot.accept();
-        }
-    }
+    // if(this.appConfig.get('hotReload')){
+    //     if (module.hot) {
+    //         module.hot.accept();
+    //     }
+    // }
 
     return this;
 }

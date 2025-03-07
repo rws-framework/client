@@ -14,7 +14,7 @@ function processImportPath(importPath, rwsWorkspaceDir, appRootDir, fileRootDir 
     const workspaceDir = this.getRWSWorkspaceDir ? this.getRWSWorkspaceDir() : rwsWorkspaceDir;
     const appRoot = this.getRWSWorkspaceDir ? this.getRWSRootDir() : appRootDir;
   
-    if (importPath.split('')[0] === '~') {
+    if (importPath.split('')[0] === '~') {       
         return fillSCSSExt(replaceWithNodeModules(importPath, appRoot, null, true), noext);
     }
 
@@ -136,8 +136,7 @@ function detectImports(code) {
 }
 
 function replaceWithNodeModules(input, appRootDir, fileDir = null, absolute = false, token = '~') {
-    _scss_fs = _scss_fs_builder(this);
-   
+    _scss_fs = _scss_fs_builder(this);   
     return input.replace(token, absolute ? `${path.join(appRootDir, 'node_modules')}/` : this.node_modules_dir(fileDir ? fileDir : appRootDir));
 }
 

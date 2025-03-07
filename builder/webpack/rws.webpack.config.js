@@ -15,7 +15,6 @@ const { setComponentsChunks, scanComponents, generateRWSInfoFile, partedComponen
 const { getBuildConfig } = require('../../cfg/build_steps/webpack/_build_config');
 const { createWebpackConfig } = require('../../cfg/build_steps/webpack/_webpack_config');
 const { executeRWSStartActions, timingActions, devActions } = require('../../cfg/build_steps/webpack/_actions');
-const { webpackDevServer } = require('../../cfg/build_steps/webpack/_dev_servers');
 const { RWS_WEBPACK_PLUGINS_BAG, addStartPlugins } = require('../../cfg/build_steps/webpack/_plugins');
 
 
