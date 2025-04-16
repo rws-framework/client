@@ -1,7 +1,7 @@
 {
     "name": "@rws-framework/client",
     "private": false,
-    "version": "2.18.3",
+    "version": "2.18.5",
     "main": "src/index.ts",
     "scripts": {
         "docs": "typedoc --tsconfig ./tsconfig.json"
@@ -11,7 +11,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/papablack/rws-client.git"
+        "url": "git+https://github.com/rws-framework/rws-client.git"
     },
     "keywords": [
         "frontend",
