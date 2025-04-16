@@ -26,8 +26,8 @@ function processImportPath(importPath, rwsWorkspaceDir, appRootDir, fileRootDir 
         return fillSCSSExt(path.join(this.appRootDir, importPath.slice(4)), noext);
     }
 
-    if (importPath.split('')[0] === '/') {
-        const originalImport = fillSCSSExt(importPath, noext);
+    if (importPath.split('')[0] === '/' || importPath.split('')[1] === ':') {
+        const originalImport = fillSCSSExt(importPath, noext);        
         
         if(!fs.existsSync(originalImport)){
             const absoluteImport = fillSCSSExt(path.join(workspaceDir, 'src', importPath), noext);
