@@ -96,8 +96,7 @@ function setupTsConfig(tsConfigPath, executionDir, pkgPath, userAliases = {}) {
                 }
             });
 
-            if(changedPaths){
-                console.log('tspaths', tsPaths);
+            if(changedPaths){                
                 console.log(chalk.blueBright('[RWS TS CONFIG]'), 'adding user aliases as paths to project tsconfig.json');
 
                 tsConfig.compilerOptions.paths = tsPaths;

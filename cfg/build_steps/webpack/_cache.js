@@ -21,7 +21,7 @@ class RWSCacheSystem {
 
         if(!this.enabled){            
             if(fs.existsSync(this.rwsDir+'/front')){
-                console.log({pat: this.rwsDir+'/front'});
+                // console.log({pat: this.rwsDir+'/front'});
                 rmdir(this.rwsDir+'/front', { recursive: true });
                 console.log(chalk.red('[RWS CACHE] front cache removed.'));
             }

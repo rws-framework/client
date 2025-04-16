@@ -37,8 +37,6 @@ const externals = (declaredCodeBase, nodeModules, automatedChunks, externalOptio
       path.resolve(__dirname,'..','..','..')
     ];        
 
-    console.log({frontendDirs})
-
     const inFrontendContext = frontendDirs.some(dir => context.startsWith(dir)) || 
         externalOptions._vars.frontendRequestContextCache.some(package => context.indexOf(package.request) > -1)
     

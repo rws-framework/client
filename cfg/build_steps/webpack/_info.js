@@ -17,10 +17,10 @@ module.exports = {
         plugins: rwsPlugins
         });
 
-        console.log(chalk.blue('\nTSCONFIG:'), util.inspect(tsConfig.config, {
-            depth: null,
-            colors: true,
-            maxArrayLength: null
-        }));
+        // console.log(chalk.blue('\nTSCONFIG:'), util.inspect(tsConfig.config, {
+        //     depth: null,
+        //     colors: true,
+        //     maxArrayLength: null
+        // }));
     }
 }
