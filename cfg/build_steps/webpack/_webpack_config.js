@@ -54,7 +54,7 @@ async function createWebpackConfig({
                 path: false
             }
         },
-        devServer: hotReload ? getRWSHotReloadSetup(hotReloadPort, outputDir) : null,
+        devServer: hotReload ? getRWSHotReloadSetup(hotReloadPort, outputDir) : false,
         module: {
             rules: getRWSLoaders(_packageDir, executionDir, tsConfig, appRootDir, entrypoint),
         },
