@@ -241,7 +241,7 @@ async function getStyles(filePath, rwsWorkspaceDir, appRootDir, addDependency, t
   return styles;
 }
 
-async function getTemplate(filePath, addDependency, templateName = null, isDev = false) {
+async function getTemplate(filePath, addDependency, className, templateName = null, isDev = false) {
   if(!templateName){
     templateName = 'template';
   }
@@ -256,7 +256,7 @@ async function getTemplate(filePath, addDependency, templateName = null, isDev =
     htmlFastImports = `import * as T from '@microsoft/fast-element';\nimport { html, css, ref, when, repeat, slotted, children } from '@microsoft/fast-element'; \nimport './${templateName}.html';\n`;
     template = `                
 //@ts-ignore                
-let rwsTemplate: any = T.html\`${templateContent}\`;
+let rwsTemplate: any = T.html<${className}>\`${templateContent}\`;
 `; addDependency(templatePath);
   }
 

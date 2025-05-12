@@ -4,7 +4,7 @@ const chalk = require('chalk');
 const _scss_cache = require('../../../cfg/build_steps/webpack/_cache');
 const LoadersHelper = require('../../../cfg/build_steps/webpack/_loaders');
 const md5 = require('md5');
-
+const json5 = require('json5');
 
 module.exports = async function(content) { 
 
@@ -28,6 +28,8 @@ module.exports = async function(content) {
       return cachedTS;
     }
 
+  
+
     if(!decoratorData){
         return content;
     }
@@ -35,20 +37,22 @@ module.exports = async function(content) {
     let templateName = null;
     let stylesPath = null;
     
-    if(decoratorData.decoratorArgs){
-        if(decoratorData.decoratorArgs.template){
+    if(decoratorData.decoratorArgs){        
+        const decoratorArgs = json5.parse(decoratorData.decoratorArgs)
+
+        if(decoratorArgs.template){
             templateName = decoratorData.decoratorArgs.template || null;
         }
 
-        if(decoratorData.decoratorArgs.styles){
+        if(decoratorArgs.styles){
             stylesPath = decoratorData.decoratorArgs.styles || null;
         }
         
-        if(decoratorData.decoratorArgs.ignorePackaging){
+        if(decoratorArgs.ignorePackaging){
             isIgnored = true;
         }
 
-        if(decoratorData.decoratorArgs.debugPackaging){
+        if(decoratorArgs.debugPackaging){
             isDebugged = true;
         }             
     }    
@@ -60,7 +64,7 @@ module.exports = async function(content) {
 
     try { 
         if(tagName){                                   
-            const [template, htmlFastImports, templateExists] = await LoadersHelper.getTemplate(filePath, this.addDependency, templateName, isDev);         
+            const [template, htmlFastImports, templateExists] = await LoadersHelper.getTemplate(filePath, this.addDependency, className, templateName, isDev);         
 
             const styles = await LoadersHelper.getStyles(filePath, this.query?.rwsWorkspaceDir, this.query?.appRootDir,this.addDependency, templateExists, stylesPath, isDev);  
 
