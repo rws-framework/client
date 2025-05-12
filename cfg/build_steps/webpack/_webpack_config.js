@@ -51,7 +51,8 @@ async function createWebpackConfig({
             },
             fallback: {                
                 fs: false,
-                path: false
+                path: false,
+                child_process: false
             }
         },
         devServer: hotReload ? getRWSHotReloadSetup(hotReloadPort, outputDir) : false,
