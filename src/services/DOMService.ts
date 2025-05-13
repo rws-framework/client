@@ -80,11 +80,10 @@ class DOMService extends RWSService {
 
     sanitizeHTML(
         line: string,                
-        sanitizeOptions: DOMPurify.Config = {})
+        sanitizeOptions: DOMPurify.Config = { })
     {
         const output: string = line.trim();
-        const sanitized = DOMPurify.sanitize(output, sanitizeOptions);
-
+        const sanitized = DOMPurify.sanitize(output, { USE_PROFILES: { html: true }, ...sanitizeOptions});
         return sanitized;
     }
 }

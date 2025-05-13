@@ -1,4 +1,6 @@
-import { RWSView, RWSViewComponent, observable, attr } from '../../../index';
+import { RWSViewComponent } from '../../../components/_component';
+import { RWSView } from '../../../components/_decorator';
+import { observable, attr } from '@microsoft/fast-element';
 
 import { ViewTemplate } from '@microsoft/fast-element';
 
@@ -18,7 +20,7 @@ class LineSplitter extends RWSViewComponent {
   {     
     const componentAllowedTags: string[] = this.allowedHTMLTags.concat(this.allowedTags.split(','));  
 
-    let output = this.domService.sanitizeHTML(line, { ADD_TAGS: componentAllowedTags });      
+    let output = this.domService.sanitizeHTML(line, { ADD_TAGS: [], ALLOWED_TAGS: componentAllowedTags });      
 
     output = output.replace(/<.*>([\s\S]*?)<\/.*>/g, (match: string) => {
         return match.replace(/\n/g, '');
