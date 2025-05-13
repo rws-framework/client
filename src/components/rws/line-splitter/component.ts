@@ -9,16 +9,35 @@ class LineSplitter extends RWSViewComponent {
   @observable text: string = '';
   @observable content: string | ViewTemplate = '<span class="dots">.</span>';
   @observable query: string = '';
+
+  @observable callback?: () => void;
   
+  @attr dots = false;
+
   @attr allowedTags = '';
-  @attr addClass = '';  
+  @attr addClass = ''; 
+  
+  private stopAnimation: () => void = () => {};
 
   private allowedHTMLTags: string[] = ['dl', 'dt', 'dd', 'br', 'blockquote', 'span', 'p', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'strong', 'i', 'small', 'u'];
 
+  connectedCallback(): void {
+      super.connectedCallback();
+
+      console.log({dots: this.dots, cb: this.callback});
+
+      if(this.dots){
+        this.stopAnimation = this.animateLoadingDots();
+      }      
+
+      if(this.text){
+        this.splitLines();
+      }
+  }
 
   parseTags(line: string): string | ViewTemplate
   {     
-    const componentAllowedTags: string[] = this.allowedHTMLTags.concat(this.allowedTags.split(','));  
+    const componentAllowedTags: string[] = this.allowedHTMLTags.concat(this.allowedTags.split(','));     
 
     let output = this.domService.sanitizeHTML(line, { ADD_TAGS: [], ALLOWED_TAGS: componentAllowedTags });      
 
@@ -47,11 +66,12 @@ class LineSplitter extends RWSViewComponent {
   }
 
   splitLines(): void
-  {    
+  {        
       if([". ", ". . ", ". . . "].includes(this.text)){
           this.content = `<span class="dots">${this.text}</span>`
-      }else{
-        this.content = this.parseTags(this.text);
+      }else{        
+        this.stopAnimation();
+        this.content = this.parseTags(this.text);    
       }
   }
 
@@ -63,18 +83,27 @@ class LineSplitter extends RWSViewComponent {
       }
   }
 
+  contentChanged(){    
+    if(this.callback){
+      this.callback();
+    }
+  }
+
+  animateLoadingDots(): () => void {
+    let counter = 1;
+    const interval = setInterval(() => {
+        counter = counter % 3 + 1;
+        this.text = '. '.repeat(counter);
+    }, 800);
+
+    // Zwracamy funkcję do zatrzymania animacji
+    return () => clearInterval(interval);
+  }
+
   addClassChanged(oldVal: string, newVal: string)
   {
       if(newVal){
           this.addClass = newVal;
-      }
-  }
-
-  connectedCallback(): void {
-      super.connectedCallback();
-
-      if(this.text){
-        this.splitLines();
       }
   }
 
