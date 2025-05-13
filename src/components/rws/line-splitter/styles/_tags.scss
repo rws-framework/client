@@ -1,0 +1,104 @@
+
+
+$bgcolor: var(--line-splitter-bgcolor, #CCC);
+$maincolor: var(--line-splitter-maincolor, #333);;
+$altcolor: #fff;
+
+blockquote {
+    position: relative;
+    font-family: 'Barlow Condensed', sans-serif;
+    max-width: 620px;
+    margin: 0 auto 80px auto;
+    align-self: center;
+    display: inline-block;
+    width: 100%;
+
+    .quote-cnt {
+        font-family: 'Abril Fatface', cursive;
+        position: relative; /* for pseudos */
+        color: $maincolor;
+        font-size: 1.4rem;    
+        line-height: 1;
+        margin: 0;
+        border: 2px solid #fff;
+        border: solid 2px;
+        border-radius:20px;
+        padding: 25px;
+        font-weight: bold;
+
+        .native {
+            font-weight: bold;
+        }
+
+        .native + .pronounciation {
+            color: $altcolor;
+
+            font-weight: normal;
+            font-size: 0.9rem; 
+            margin-left: 15px;   
+        }
+    
+        &:after {
+            content:"";
+            position: absolute;
+            border: 2px solid $maincolor;
+            border-radius: 0 50px 0 0;
+            width: 60px;
+            height: 60px;
+            bottom: -62px;
+            left: 50px;
+            border-bottom: none;
+            border-left: none;
+            z-index: 3; 
+        }
+    
+        &:before {
+            content:"";
+            position: absolute;
+            width: 80px;
+            border: 6px solid $bgcolor;
+            bottom: -3px;
+            left: 50px;
+            z-index: 2;
+        }
+    }
+}
+
+dl{
+
+    @include grid-container();
+    @include grid-flex-align-items(center, center);
+
+    dt{        
+        text-align: right;
+        font-weight: bold;
+        font-size: 1.2rem; 
+        padding: 0 15px;
+        margin-bottom: 80px;
+
+        @include grid-column(6);
+
+        &:after{
+            content: ":";       
+            font-weight: bold;
+            font-size: 1.2rem;                  
+        }
+    }
+
+    dd{        
+        margin-left: 0;
+        @include grid-column(6);
+    }
+}
+
+p{
+    margin: 0 0 15px 0;
+}
+
+h1, h2, h3 {
+    margin: 10px 0 15px 0;
+}
+
+ul, ol {
+    margin: 0;
+}

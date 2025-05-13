@@ -1,4 +1,3 @@
-import { Transformer as HTMLTagTransformerType, Tag as HTMLTag, Attributes as HTMLAttributes } from 'sanitize-html';
 import { observable, attr } from '@microsoft/fast-element';
 
 import RWSService from './services/_service';
@@ -84,8 +83,5 @@ export type {
     IAssetShowOptions as IRWSAssetShowOptions,
     IRWSConfig,
     IRWSUser,
-    TagsProcessorType,
-    HTMLTagTransformerType,
-    HTMLTag,
-    HTMLAttributes
+    TagsProcessorType
 }

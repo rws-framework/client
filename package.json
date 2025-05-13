@@ -1,7 +1,7 @@
 {
     "name": "@rws-framework/client",
     "private": false,
-    "version": "2.18.11",
+    "version": "2.18.12",
     "main": "src/index.ts",
     "scripts": {
         "docs": "typedoc --tsconfig ./tsconfig.json"
@@ -32,7 +32,6 @@
         "@types/moment": "^2.13.0",
         "deepmerge": "^4.3.1",
         "dragula": "^3.7.3",
-        "entities": "6.0.0",
         "he": "^1.2.0",
         "json5": "^2.2.3",
         "lodash": "^4.17.21",
@@ -45,10 +44,9 @@
         "url-router": "^13.0.0",
         "uuid": "^9.0.1",
         "v4": "^0.0.1",
-        "scss-loading-animations": "^1.0.1"
+        "scss-loading-animations": "^1.0.1"        
     },
-    "devDependencies": {
-        "sanitize-html": "^2.16.0",
+    "devDependencies": {        
         "sass": "^1.87.0",
         "html-webpack-plugin": "^5.6.3",
         "css-minimizer-webpack-plugin": "^7.0.2",
