@@ -17,7 +17,7 @@ function compileScssCode(scssCode, fileRootDir, rwsWorkspaceDir, appRoot) {
     const dependencies = scssImports.map((item) => item[2]);
 
     if (scssImports && scssImports.length) {
-      scssCode = _scss_import.replaceImports(_scss_import.processImports(scssImports, rwsWorkspaceDir, fileRootDir), scssCode);
+      scssCode = _scss_import.replaceImports(_scss_import.processImports(scssImports, rwsWorkspaceDir, fileRootDir), scssCode);  
     }
 
     const uses = _scss_import.extractScssUses(scssCode)[0];

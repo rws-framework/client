@@ -18,8 +18,8 @@ function processImportPath(importPath, rwsWorkspaceDir, appRootDir, fileRootDir 
         return fillSCSSExt(replaceWithNodeModules(importPath, appRoot, null, true), noext);
     }
 
-    if (importPath.indexOf('@rws-mixins') === 0) {
-        return path.resolve(rwsPath.findPackageDir(workspaceDir), 'src', 'styles', 'includes.scss');
+    if (importPath.indexOf('@rws-mixins') === 0) {        
+        return path.resolve(rwsPath.findPackageDir(__dirname), 'src', 'styles', 'includes.scss');
     }
 
     if (importPath.indexOf('@cwd') === 0) {
@@ -163,8 +163,8 @@ function processImports(imports, fileRootDir, rwsWorkspaceDir, importStorage = {
         const workspaceDir = this.getRWSWorkspaceDir ? this.getRWSWorkspaceDir() : importData[3];
         const appRoot = this.getRWSWorkspaceDir ? this.getRWSRootDir() : importData[4];
 
-        let importPath = processImportPath(originalImportPath, workspaceDir, appRoot, fileRootDir);            
-      
+        let importPath = processImportPath(originalImportPath, workspaceDir, appRoot, fileRootDir);              
+
         let replacedScssContent = getStorage(importPath, _scss_fs.getCodeFromFile(importPath, workspaceDir, appRoot).replace(/\/\*[\s\S]*?\*\//g, ''));
 
         const recursiveImports = extractScssImports(replacedScssContent, workspaceDir, appRoot, importPath)[0];
@@ -172,7 +172,7 @@ function processImports(imports, fileRootDir, rwsWorkspaceDir, importStorage = {
         if (recursiveImports.length) {
             replacedScssContent = replaceImports(processImports(recursiveImports, path.dirname(importPath), workspaceDir, importStorage, true), replacedScssContent);
         }
-
+        
         importResults.push({
             line: importData[1],
             code: replacedScssContent
