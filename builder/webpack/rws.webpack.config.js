@@ -96,7 +96,7 @@ const RWSWebpackWrapper = async (appRoot, rwsFrontendConfig,  _packageDir) => {
       optimConfig = {};
     }
 
-    optimConfig = getRWSProductionSetup(optimConfig, tsConfigPath);
+    optimConfig = getRWSProductionSetup(optimConfig, tsConfig.path);
   }
 
   // #SECTION RWS DEV ACTIONS

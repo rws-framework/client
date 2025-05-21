@@ -1,7 +1,7 @@
 {
     "name": "@rws-framework/client",
     "private": false,
-    "version": "2.18.17",
+    "version": "2.18.18",
     "main": "src/index.ts",
     "scripts": {
         "docs": "typedoc --tsconfig ./tsconfig.json"
