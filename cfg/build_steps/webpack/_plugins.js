@@ -3,6 +3,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const { processEnvDefines } = require('./_env_defines');
 const path = require('path');
+const fs = require('fs');
 
 const RWS_WEBPACK_PLUGINS_BAG = {
     _plugins: [],
@@ -48,19 +49,46 @@ function getDefinesPlugins(BuildConfigurator, rwsFrontendConfig, devDebug) {
     ]
 }
 
-function getBuilderDevPlugins(BuildConfigurator, rwsFrontendConfig, devDebug) {    
-    if(!devDebug?.profiling){
-        return [];
-    }
-
-    const profiling =  new webpack.debug.ProfilingPlugin({
-        outputPath: path.join(BuildConfigurator.get('outputDir') || rwsFrontendConfig.outputDir, '.profiling/profileEvents.json'),
-    });
-
+function getBuilderDevPlugins(BuildConfigurator, rwsFrontendConfig, devDebug) {        
+    const plugins = [];
     
-    return [
-        profiling
-    ]
+
+    if(devDebug?.profiling){
+        const profiling = new webpack.debug.ProfilingPlugin({
+            outputPath: path.resolve(BuildConfigurator.get('executionDir'), BuildConfigurator.get('outputDir') || rwsFrontendConfig.outputDir, '.profiling/profileEvents.json'),
+        });
+        plugins.push(profiling);
+
+        class FileListPlugin {
+            apply(compiler) {
+              compiler.hooks.done.tap('FileListPlugin', (stats) => {
+                const files = [];
+                stats.compilation.modules.forEach(module => {
+                  if (module.resource) {
+                    files.push(module.resource);
+                  }
+                });
+          
+                const output = `// Generated on ${new Date().toISOString()}\n` +
+                               `// Total files processed: ${files.length}\n\n` +
+                               `module.exports = ${JSON.stringify(files, null, 2)};\n`;
+          
+                const reportPath = path.join(BuildConfigurator.get('executionDir'), 'processed-files.js');
+    
+                fs.writeFileSync(
+                  reportPath, 
+                  output
+                );
+          
+                console.log(`\n[FileListPlugin] Saved ${files.length} processed files to ${reportPath}`);
+              });
+            }
+        }
+
+        plugins.push(new FileListPlugin());
+    }
+    
+    return plugins;
 }
 
 function getBuilderOptimPlugins(BuildConfigurator, rwsFrontendConfig) {

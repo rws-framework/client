@@ -5,19 +5,29 @@ const os = require('os');
 const { parseWebpackPath } = require('./_parser');
 
 const RWSCssPlugin = require("../../../builder/webpack/rws_scss_plugin");
-
 const chalk = require('chalk');
 const { timingCounterStart, timingCounterStop } = require('./_timing');
 const { rwsRuntimeHelper, rwsPath } = require('@rws-framework/console');
 
-function getRWSLoaders(packageDir, executionDir, tsConfigData, appRootDir, entrypoint) {
+function getRWSLoaders(packageDir, executionDir, tsConfigData, appRootDir, entrypoint, loaderIgnoreExceptions) {
   const scssLoader = path.join(packageDir, 'builder/webpack/loaders/rws_fast_scss_loader.js');
   const tsLoader = path.join(packageDir, 'builder/webpack/loaders/rws_fast_ts_loader.js');
   const htmlLoader = path.join(packageDir, 'builder/webpack/loaders/rws_fast_html_loader.js');
 
   const tsConfigPath = tsConfigData.path;
 
-  const loaders = [
+  const allowedModules = ['@rws-framework\\/[A-Z0-9a-z]'];
+  // console.log('XXX', config);
+
+  if(loaderIgnoreExceptions){
+    for(const ignoreException of loaderIgnoreExceptions){
+      allowedModules.push(ignoreException);
+    }
+  }
+
+  const modulePattern = `node_modules\\/(?!(${allowedModules.join('|')}))`;
+
+  const loaders = [    
     {
       test: /\.json$/,
       type: 'javascript/auto',
@@ -35,7 +45,7 @@ function getRWSLoaders(packageDir, executionDir, tsConfigData, appRootDir, entry
     },
     {
       test: /\.(ts)$/,
-      use: [
+      use: [        
         {
           loader: 'ts-loader',
           options: {
@@ -45,11 +55,14 @@ function getRWSLoaders(packageDir, executionDir, tsConfigData, appRootDir, entry
                 experimentalDecorators: true,
                 target: "ES2018",
                 module: "commonjs"
-            },            
-            transpileOnly: false, 
+            },                        
+            allowTsInNodeModules: true,
+            reportFiles: true,
             logLevel: "info",
             logInfoToStdOut: true,
             context: executionDir,
+            transpileOnly: true, 
+            experimentalWatchApi: true,            
             errorFormatter: (message, colors) => {
               console.log({message});
               const messageText = typeof message === 'object' ? JSON.stringify(message, null, 2) : message;
@@ -71,6 +84,7 @@ function getRWSLoaders(packageDir, executionDir, tsConfigData, appRootDir, entry
       ],
       exclude: [
         ...tsConfigData.excludes.map(item => item.abs()),
+        new RegExp(modulePattern),
         path.resolve(packageDir, 'builder'),            
         /\.debug\.ts$/,
         /\.d\.ts$/        

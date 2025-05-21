@@ -14,7 +14,7 @@ async function loadAliases(packageDir, tsConfig, nodeModulesPath, executionDir){
         const alias = tsConfig.config.compilerOptions.paths[aliasKey];
         tsPaths[aliasKey] = path.resolve(executionDir, alias[0]);
     }
-
+    
     for(const pkgName of packageNames){
         const symlinkPath = path.join(nodeModulesPath, '@rws-framework', pkgName);
 

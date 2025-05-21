@@ -43,6 +43,8 @@ async function getBuildConfig(rwsFrontBuildConfig, _packageDir){
 
     const rwsPlugins = {};
 
+    const loaderIgnoreExceptions = await (BuildConfigurator.get('loaderIgnoreExceptions') || rwsFrontBuildConfig.loaderIgnoreExceptions)
+
     if(rwsFrontBuildConfig.rwsPlugins){
         for(const pluginEntry of rwsFrontBuildConfig.rwsPlugins){
           const pluginBuilder = (await import(`${pluginEntry}/build.js`)).default;      
@@ -72,7 +74,8 @@ async function getBuildConfig(rwsFrontBuildConfig, _packageDir){
         rwsPlugins,        
         BuildConfigurator,
         hotReload,
-        hotReloadPort
+        hotReloadPort,
+        loaderIgnoreExceptions
     }
 }
 

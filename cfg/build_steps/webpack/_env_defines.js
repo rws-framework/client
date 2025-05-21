@@ -9,7 +9,6 @@ function processEnvDefines(BuildConfigurator, config, devDebug) {
     }
 
     const rwsDefines = BuildConfigurator.get('env') || config.env || null;
-
     if (rwsDefines) {
         const stringifiedDefines = Object.entries(rwsDefines).reduce((acc, [key, value]) => ({
             ...acc,

@@ -45,7 +45,8 @@ const RWSWebpackWrapper = async (appRoot, rwsFrontendConfig,  _packageDir) => {
     rwsPlugins,
     BuildConfigurator,
     hotReload,
-    hotReloadPort
+    hotReloadPort,
+    loaderIgnoreExceptions
   } = await getBuildConfig(rwsFrontendConfig, _packageDir);
 
   timeLog({ devDebug });
@@ -56,6 +57,7 @@ const RWSWebpackWrapper = async (appRoot, rwsFrontendConfig,  _packageDir) => {
 
   rwsPath.removeDirectory(outputDir, true);
   buildInfo.start(executionDir, tsConfig, outputDir, isDev, publicDir, isParted, partedPrefix, partedDirUrlPrefix, devTools, rwsFrontendConfig.rwsPlugins);
+
 
   // #SECTION INIT PLUGINS && ENV VARS DEFINES
   addStartPlugins(rwsFrontendConfig, BuildConfigurator, devDebug, hotReload, isReport);
@@ -133,8 +135,10 @@ const RWSWebpackWrapper = async (appRoot, rwsFrontendConfig,  _packageDir) => {
     appRootDir: appRoot,
     entrypoint: rwsFrontendConfig.entrypoint,
     hotReload,
-    hotReloadPort
+    hotReloadPort,
+    loaderIgnoreExceptions
 });  
+
 
   if (optimConfig) {
     // setup production config if it got created above
