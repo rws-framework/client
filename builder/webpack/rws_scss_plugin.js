@@ -19,6 +19,7 @@ class RWSScssPlugin {
     appRootDir: null,
     rwsWorkspaceDir: null,
     publicDir: null,
+    cssDir: null,
     autoCompile: []
   }) {
     this.node_modules_dir = (fileDir) => path.relative(fileDir, path.join(this.getRWSRootDir(), '/node_modules'))
@@ -27,6 +28,7 @@ class RWSScssPlugin {
     _scss_compiler = _scss_compiler_builder(this);
 
     this.pubDir = params.publicDir;
+    this.cssDir = params.cssDir;    
 
     if(!params.rwsWorkspaceDir){      
       throw new Error('Pass "rwsWorkspaceDir" to the "@rws-framework/client/builder/webpack/loaders/rws_fast_ts_loader.js" loader.');
@@ -65,7 +67,7 @@ class RWSScssPlugin {
   }
 
   writeCssFile(scssFilePath, cssContent){
-    return _scss_fs.writeCssFile(scssFilePath, cssContent);
+    return _scss_fs.writeCssFile(scssFilePath, cssContent, this.getRWSWorkspaceDir(), this.getCssDir());
   }
 
   getRWSWorkspaceDir() {
@@ -74,6 +76,10 @@ class RWSScssPlugin {
 
   getRWSRootDir() {
     return this.appRootDir;
+  }
+
+  getCssDir() {
+    return this.cssDir;
   }
 
   getPubDir() {

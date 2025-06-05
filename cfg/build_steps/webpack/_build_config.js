@@ -26,6 +26,8 @@ async function getBuildConfig(rwsFrontBuildConfig, _packageDir){
 
     const outputFileName = BuildConfigurator.get('outputFileName') || rwsFrontBuildConfig.outputFileName;
     const publicDir = BuildConfigurator.get('publicDir') || rwsFrontBuildConfig.publicDir;
+    const cssDir = BuildConfigurator.get('cssDir') || rwsFrontBuildConfig.cssDir;
+
     const serviceWorkerPath = BuildConfigurator.get('serviceWorker') || rwsFrontBuildConfig.serviceWorker;
 
     const publicIndex = BuildConfigurator.get('publicIndex') || rwsFrontBuildConfig.publicIndex;
@@ -65,6 +67,7 @@ async function getBuildConfig(rwsFrontBuildConfig, _packageDir){
         outputDir,
         outputFileName,
         publicDir,
+        cssDir,
         serviceWorkerPath,
         publicIndex,
         devTools,

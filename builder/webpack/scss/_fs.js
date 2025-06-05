@@ -5,19 +5,29 @@ let _scss_import = null;
 const _COMPILE_DIR_NAME = 'compiled';
 
 
-function writeCssFile(scssFilePath, cssContent) {
+function writeCssFile(scssFilePath, cssContent, workspaceDir, finalCssDirOverride = null) {
     const cssFilePath = scssFilePath.replace('.scss', '.css');
-    let endCssFilePath = cssFilePath.split('/');
+    let endCssFilePath = cssFilePath.split(path.sep);
     let endCssDir = [...endCssFilePath];
     endCssDir[endCssDir.length - 1] = `${_COMPILE_DIR_NAME}`;
-    endCssDir = endCssDir.join('/');
+    endCssDir = endCssDir.join(path.sep);
+    const fileName = endCssFilePath[endCssFilePath.length - 1];
 
-    if (!fs.existsSync(endCssDir)) {
-      fs.mkdirSync(endCssDir);
+    if(!finalCssDirOverride){
+      if (!fs.existsSync(endCssDir)) {
+        fs.mkdirSync(endCssDir);
+      }
+
+      endCssFilePath[endCssFilePath.length - 1] = `${_COMPILE_DIR_NAME}${path.sep}` + fileName;
+      endCssFilePath = endCssFilePath.join(path.sep);
+    }else{
+      const cssDirPath = path.join(workspaceDir, finalCssDirOverride);
+      if(!fs.existsSync(cssDirPath)){
+        fs.mkdirSync(cssDirPath);
+      }
+
+      endCssFilePath = path.join(cssDirPath, fileName);
     }
-
-    endCssFilePath[endCssFilePath.length - 1] = `${_COMPILE_DIR_NAME}/` + endCssFilePath[endCssFilePath.length - 1];
-    endCssFilePath = endCssFilePath.join('/');
 
     fs.writeFile(endCssFilePath, cssContent, () => {});
     console.log('Saved external CSS file in: ' + endCssFilePath);

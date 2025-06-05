@@ -10,7 +10,7 @@ const { timingCounterStart, timingCounterStop } = require('./_timing');
 const { rwsRuntimeHelper, rwsPath } = require('@rws-framework/console');
 
 
-function getRWSLoaders(packageDir, executionDir, tsConfigData, appRootDir, entrypoint, loaderIgnoreExceptions, publicDir) {
+function getRWSLoaders(packageDir, executionDir, tsConfigData, appRootDir, entrypoint, loaderIgnoreExceptions, publicDir, cssDir) {
   const scssLoader = path.join(packageDir, 'builder/webpack/loaders/rws_fast_scss_loader.js');
   const tsLoader = path.join(packageDir, 'builder/webpack/loaders/rws_fast_ts_loader.js');
   const htmlLoader = path.join(packageDir, 'builder/webpack/loaders/rws_fast_html_loader.js');
@@ -100,7 +100,8 @@ function getRWSLoaders(packageDir, executionDir, tsConfigData, appRootDir, entry
           options: {
             rwsWorkspaceDir: executionDir,
             appRootDir,
-            publicDir
+            publicDir,
+            cssDir
           }
         },
       ],

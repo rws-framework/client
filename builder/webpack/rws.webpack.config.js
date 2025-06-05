@@ -36,6 +36,7 @@ const RWSWebpackWrapper = async (appRoot, rwsFrontendConfig,  _packageDir) => {
     outputDir,
     outputFileName,
     publicDir,
+    cssDir,
     serviceWorkerPath,
     publicIndex,
     devTools,
@@ -137,6 +138,7 @@ const RWSWebpackWrapper = async (appRoot, rwsFrontendConfig,  _packageDir) => {
     hotReload,
     hotReloadPort,
     publicDir,
+    cssDir,
     loaderIgnoreExceptions
 });  
 

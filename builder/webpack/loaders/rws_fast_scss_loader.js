@@ -11,7 +11,8 @@ module.exports = async function(content) {
     const plugin = new RWSScssPlugin({
         appRootDir: this.query?.appRootDir,
         rwsWorkspaceDir: this.query?.rwsWorkspaceDir,
-        publicDir: this.query?.publicDir
+        publicDir: this.query?.publicDir,
+        cssDir: this.query?.cssDir
     }); 
     let fromTs = false;    
 
