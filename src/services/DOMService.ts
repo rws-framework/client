@@ -1,6 +1,6 @@
 import RWSService from './_service';
 import { DOM } from '@microsoft/fast-element';
-// import htmlSanitizer, { Transformer, IOptions } from 'sanitize-html';
+import DOMPurify from 'dompurify';
 
 type TagsProcessorType = { [tagName: string]: string | Transformer };
 type DOMOutputType<T extends Element> = NodeListOf<T> | T | null;
@@ -76,6 +76,15 @@ class DOMService extends RWSService {
                 resolve();
             });
         });
+    }
+
+    sanitizeHTML(
+        line: string,                
+        sanitizeOptions: DOMPurify.Config = { })
+    {
+        const output: string = line.trim();
+        const sanitized = DOMPurify.sanitize(output, { USE_PROFILES: { html: true }, ...sanitizeOptions});
+        return sanitized;
     }
 }
 

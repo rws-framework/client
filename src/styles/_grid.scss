@@ -30,7 +30,7 @@ $mediaQuerySteps: (
 @mixin grid-column($columns: 12, $mdColumns: 12) {
   @include internal-grid-column($columns);
 
-  @media screen and (max-width: map-get($mediaQuerySteps, 'md')) {
+  @media screen and (max-width: map.get($mediaQuerySteps, 'md')) {
     @include internal-grid-column($mdColumns);
   }
 }
@@ -38,11 +38,11 @@ $mediaQuerySteps: (
 @mixin grid-column($columns: 12, $mdColumns: 12, $smColumns: 12) {
   @include internal-grid-column($columns);
 
-  @media screen and (max-width: map-get($mediaQuerySteps, 'md')) {
+  @media screen and (max-width: map.get($mediaQuerySteps, 'md')) {
     @include internal-grid-column($mdColumns);
   }
 
-  @media screen and (max-width: map-get($mediaQuerySteps, 'sm')) {
+  @media screen and (max-width: map.get($mediaQuerySteps, 'sm')) {
     @include internal-grid-column($smColumns);
   }
 }
@@ -50,15 +50,15 @@ $mediaQuerySteps: (
 @mixin grid-column($columns: 12, $mdColumns: 12, $smColumns: 12, $xsColumns: 12) {
   @include internal-grid-column($columns);
 
-  @media screen and (max-width: map-get($mediaQuerySteps, 'md')) {
+  @media screen and (max-width: map.get($mediaQuerySteps, 'md')) {
     @include internal-grid-column($mdColumns);
   }
 
-  @media screen and (max-width: map-get($mediaQuerySteps, 'sm')) {
+  @media screen and (max-width: map.get($mediaQuerySteps, 'sm')) {
     @include internal-grid-column($smColumns);
   }
 
-  @media screen and (max-width: map-get($mediaQuerySteps, 'xs')) {
+  @media screen and (max-width: map.get($mediaQuerySteps, 'xs')) {
     @include internal-grid-column($xsColumns);
   }
 }

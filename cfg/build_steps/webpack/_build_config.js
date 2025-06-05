@@ -39,9 +39,11 @@ async function getBuildConfig(rwsFrontBuildConfig, _packageDir){
 
     const devRouteProxy = BuildConfigurator.get('devRouteProxy') || rwsFrontBuildConfig.devRouteProxy;
 
-    const tsConfig = await (BuildConfigurator.get('tsConfig') || rwsFrontBuildConfig.tsConfig)(_packageDir, true, false);
+    const tsConfig = await (BuildConfigurator.get('tsConfig') || rwsFrontBuildConfig.tsConfig)(_packageDir, true);
 
     const rwsPlugins = {};
+
+    const loaderIgnoreExceptions = await (BuildConfigurator.get('loaderIgnoreExceptions') || rwsFrontBuildConfig.loaderIgnoreExceptions)
 
     if(rwsFrontBuildConfig.rwsPlugins){
         for(const pluginEntry of rwsFrontBuildConfig.rwsPlugins){
@@ -72,7 +74,8 @@ async function getBuildConfig(rwsFrontBuildConfig, _packageDir){
         rwsPlugins,        
         BuildConfigurator,
         hotReload,
-        hotReloadPort
+        hotReloadPort,
+        loaderIgnoreExceptions
     }
 }
 

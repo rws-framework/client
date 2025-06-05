@@ -18,8 +18,8 @@ function processImportPath(importPath, rwsWorkspaceDir, appRootDir, fileRootDir 
         return fillSCSSExt(replaceWithNodeModules(importPath, appRoot, null, true), noext);
     }
 
-    if (importPath.indexOf('@rws-mixins') === 0) {
-        return path.resolve(rwsPath.findPackageDir(workspaceDir), 'src', 'styles', 'includes.scss');
+    if (importPath.indexOf('@rws-mixins') === 0) {        
+        return path.resolve(rwsPath.findPackageDir(__dirname), 'src', 'styles', 'includes.scss');
     }
 
     if (importPath.indexOf('@workspace') === 0) {        
@@ -180,7 +180,7 @@ function processImports(imports, fileRootDir, rwsWorkspaceDir, importStorage = {
         if (recursiveImports.length) {
             replacedScssContent = replaceImports(processImports(recursiveImports, path.dirname(importPath), workspaceDir, importStorage, true, pubDir), replacedScssContent);
         }
-
+        
         importResults.push({
             line: importData[1],
             code: replacedScssContent

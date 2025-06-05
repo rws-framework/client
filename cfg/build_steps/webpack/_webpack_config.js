@@ -24,7 +24,8 @@ async function createWebpackConfig({
     entrypoint,
     hotReload,
     hotReloadPort,
-    publicDir = null
+    publicDir = null,
+    loaderIgnoreExceptions
 }) { 
 
     if(hotReload){
@@ -52,12 +53,13 @@ async function createWebpackConfig({
             },
             fallback: {                
                 fs: false,
-                path: false
+                path: false,
+                child_process: false
             }
         },
-        devServer: hotReload ? getRWSHotReloadSetup(hotReloadPort, outputDir) : null,
-        module: {
-            rules: getRWSLoaders(_packageDir, executionDir, tsConfig, appRootDir, entrypoint, publicDir),
+        devServer: hotReload ? getRWSHotReloadSetup(hotReloadPort, outputDir) : false,
+        module: {            
+            rules: getRWSLoaders(_packageDir, executionDir, tsConfig, appRootDir, entrypoint, loaderIgnoreExceptions, publicDir),
         },
         plugins: WEBPACK_PLUGINS,
         // externals: rwsExternals(_packageDir, executionDir, modules_setup, automatedChunks, {
