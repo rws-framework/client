@@ -9,15 +9,15 @@ let _scss_fonts = null;
 const _scss_import_builder = require('./_import');
 let _scss_import = null;
 
-function compileScssCode(scssCode, fileRootDir, rwsWorkspaceDir, appRoot) {  
+function compileScssCode(scssCode, fileRootDir, rwsWorkspaceDir, appRoot, pubDir = null) {
     _scss_fonts = _scss_fonts_builder(this);
     _scss_import = _scss_import_builder(this);    
-    const [scssImports] = _scss_import.extractScssImports(scssCode, rwsWorkspaceDir, appRoot, fileRootDir);
+    const [scssImports] = _scss_import.extractScssImports(scssCode, rwsWorkspaceDir, appRoot, fileRootDir, pubDir);
 
-    const dependencies = scssImports.map((item) => item[2]);
+    const dependencies = scssImports.map((item) => item[2]);    
 
     if (scssImports && scssImports.length) {
-      scssCode = _scss_import.replaceImports(_scss_import.processImports(scssImports, rwsWorkspaceDir, fileRootDir), scssCode);
+      scssCode = _scss_import.replaceImports(_scss_import.processImports(scssImports, rwsWorkspaceDir, fileRootDir, {}, false, pubDir), scssCode);
     }
 
     const uses = _scss_import.extractScssUses(scssCode)[0];
@@ -38,7 +38,8 @@ function compileScssCode(scssCode, fileRootDir, rwsWorkspaceDir, appRoot) {
       const result = sass.compileString(scssCode, { loadPaths: [fileRootDir]});
 
       let compiledCode = result.css.toString();
-      compiledCode = _scss_fonts.replaceFontUrlWithBase64(compiledCode, rwsWorkspaceDir, appRoot);
+      // console.log({rwsWorkspaceDir, appRoot});
+      compiledCode = _scss_fonts.replaceFontUrlWithBase64(compiledCode, rwsWorkspaceDir, appRoot, pubDir);
       compiledCode = replaceEmojisWithQuestionMark(compiledCode, fileRootDir);
       return { code: compiledCode, dependencies};
     } catch (err) {
@@ -89,7 +90,7 @@ function compileScssCode(scssCode, fileRootDir, rwsWorkspaceDir, appRoot) {
     return code;
   }
   
-  module.exports = function(element) {
+  module.exports = function(element, publicDir = null) {    
     return {
         checkForImporterType: checkForImporterType.bind(element),
         compileScssCode: compileScssCode.bind(element)

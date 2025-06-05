@@ -62,7 +62,7 @@ module.exports = async function(content) {
         if(tagName){                                   
             const [template, htmlFastImports, templateExists] = await LoadersHelper.getTemplate(filePath, this.addDependency, templateName, isDev);         
 
-            const styles = await LoadersHelper.getStyles(filePath, this.query?.rwsWorkspaceDir, this.query?.appRootDir,this.addDependency, templateExists, stylesPath, isDev);  
+            const styles = await LoadersHelper.getStyles(filePath, this.query?.rwsWorkspaceDir, this.query?.appRootDir,this.addDependency, templateExists, stylesPath, isDev, this.query?.publicDir);  
 
             if(className){                
                 const replacedViewDecoratorContent =  decoratorExtract.replacedDecorator;  

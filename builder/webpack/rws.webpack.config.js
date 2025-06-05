@@ -133,7 +133,8 @@ const RWSWebpackWrapper = async (appRoot, rwsFrontendConfig,  _packageDir) => {
     appRootDir: appRoot,
     entrypoint: rwsFrontendConfig.entrypoint,
     hotReload,
-    hotReloadPort
+    hotReloadPort,
+    publicDir
 });  
 
   if (optimConfig) {

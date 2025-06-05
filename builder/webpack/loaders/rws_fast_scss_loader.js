@@ -10,7 +10,8 @@ module.exports = async function(content) {
     const saveFile = content.indexOf('@save') > -1; 
     const plugin = new RWSScssPlugin({
         appRootDir: this.query?.appRootDir,
-        rwsWorkspaceDir: this.query?.rwsWorkspaceDir
+        rwsWorkspaceDir: this.query?.rwsWorkspaceDir,
+        publicDir: this.query?.publicDir
     }); 
     let fromTs = false;    
 

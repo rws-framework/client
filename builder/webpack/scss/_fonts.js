@@ -44,7 +44,7 @@ function convertFontToBase64(fontPath) {
     return fs.readFileSync(fontPath, { encoding: 'base64' });
 }
 
-function replaceFontUrlWithBase64(cssContent, rwsWorkspaceDir, appRoot) {
+function replaceFontUrlWithBase64(cssContent, rwsWorkspaceDir, appRoot, pubDir = null) {
     const fontFaceRegex = /@font-face\s*\{[^}]*\}/g;
     let fontFaces = [...cssContent.matchAll(fontFaceRegex)];
     _scss_import = _scss_import_builder(this);
@@ -56,9 +56,8 @@ function replaceFontUrlWithBase64(cssContent, rwsWorkspaceDir, appRoot) {
 
         let modifiedFontFaceContent = fontFaceContent;
 
-        while ((match = urlRegex.exec(fontFaceContent)) !== null) {
-            // Create a promise to convert each font to Base64 and replace in CSS
-            const base64 = convertFontToBase64(_scss_import.processImportPath(match[2], rwsWorkspaceDir, appRoot, null, true));
+        while ((match = urlRegex.exec(fontFaceContent)) !== null) {            
+            const base64 = convertFontToBase64(_scss_import.processImportPath(match[2], rwsWorkspaceDir, appRoot, null, true, pubDir));
             const base64Font = `data:font/woff2;base64,${base64}`;
 
             modifiedFontFaceContent = modifiedFontFaceContent.replace(match[2], base64Font);
