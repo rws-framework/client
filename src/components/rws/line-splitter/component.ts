@@ -22,9 +22,7 @@ class LineSplitter extends RWSViewComponent {
   private allowedHTMLTags: string[] = ['dl', 'dt', 'dd', 'br', 'blockquote', 'span', 'p', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'strong', 'i', 'small', 'u'];
 
   connectedCallback(): void {
-      super.connectedCallback();
-
-      console.log({dots: this.dots, cb: this.callback});
+      super.connectedCallback();      
 
       if(this.dots){
         this.stopAnimation = this.animateLoadingDots();
