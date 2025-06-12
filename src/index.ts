@@ -10,6 +10,8 @@ import ServiceWorkerService, { ServiceWorkerServiceInstance } from './services/S
 import { ngAttr } from './components/_attrs/angular-attr';
 import { externalObservable } from './components/_attrs/external-observable';
 import { externalAttr } from './components/_attrs/external-attr';
+import { jsonAttr } from './components/_attrs/json-attr';
+
 import { RWSPlugin } from './plugins/_plugin';
 import RWSClient, { RWSClientInstance } from './client';
 import RWSViewComponent from './components/_component';
@@ -62,6 +64,7 @@ export {
     observable,
     externalObservable,
     externalAttr,
+    jsonAttr,
     attr,
     ngAttr,
     
