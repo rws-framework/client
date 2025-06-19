@@ -15,7 +15,6 @@ import RWSWindow, { RWSWindowComponentRegister, loadRWSRichWindow } from './type
 
 import { DI, Container, Registration } from './components/_container';
 
-import { declareRWSComponents } from './components/index';
 import RWSContainer from './components/_container';
 import TheRWSService from './services/_service';
 
@@ -206,4 +205,4 @@ class RWSClient {
 }
 
 export default DI.createInterface<RWSClient>(x => x.singleton(RWSClient));
-export {  RWSClient as RWSClientInstance, declareRWSComponents };
+export {  RWSClient as RWSClientInstance };
