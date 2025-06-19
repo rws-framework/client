@@ -18,7 +18,6 @@ import RWSViewComponent from './components/_component';
 import RWSContainer from './components/_container';
 
 import {  RWSIgnore, RWSInject, RWSView } from './components/_decorator';
-import { declareRWSComponents } from './components';
 
 import type { DefaultRWSPluginOptionsType } from './plugins/_plugin';
 import type { IRWSPlugin, IStaticRWSPlugin, IPluginSpawnOption } from './types/IRWSPlugin';
@@ -69,8 +68,7 @@ export {
     ngAttr,
     
     RWSService,
-    RWSViewComponent,       
-    declareRWSComponents,
+    RWSViewComponent,
 
     RWSContainer
 };
