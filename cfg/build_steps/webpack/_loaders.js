@@ -1,4 +1,5 @@
 const path = require('path');
+const json5 = require('json5');
 const fs = require('fs');
 const os = require('os');
 
@@ -191,14 +192,22 @@ function extractRWSViewArgs(content, noReplace = false) {
 
   let fastOptions = _defaultRWSLoaderOptions.fastOptions;
 
+  if(decoratorArgs && decoratorArgs !== ''){
+    try {
+      decoratorArgs = json5.parse(decoratorArgs);
+    }catch(e){
+
+    }
+  }
+
   if (decoratorArgs && decoratorArgs.fastElementOptions) {
     fastOptions = decoratorArgs.fastElementOptions;
   }
  
   let replacedDecorator = null;
 
-  if(!noReplace){
-    const [addedParamDefs, addedParams] = _extractRWSViewDefs(fastOptions, decoratorArgs);
+  if(!noReplace){    
+    const [addedParamDefs, addedParams] = _extractRWSViewDefs(fastOptions, decoratorArgs);    
     const replacedViewDecoratorContent = processedContent.replace(
       viewReg,
       `@RWSView('$1', null, { template: rwsTemplate, styles${addedParams.length ? ', options: {' + (addedParams.join(', ')) + '}' : ''} })\n$3class $4 extends RWSViewComponent `

@@ -37,8 +37,8 @@ module.exports = async function(content) {
     let templateName = null;
     let stylesPath = null;
     
-    if(decoratorData.decoratorArgs){        
-        const decoratorArgs = json5.parse(decoratorData.decoratorArgs)
+    if(decoratorData.decoratorArgs){                     
+        const decoratorArgs = decoratorData.decoratorArgs
 
         if(decoratorArgs.template){
             templateName = decoratorData.decoratorArgs.template || null;

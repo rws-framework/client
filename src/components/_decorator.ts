@@ -11,7 +11,9 @@ import { handleExternalChange } from './_attrs/_external_handler';
 interface RWSDecoratorOptions {
     template?: string,
     styles?: string,
-    fastElementOptions?: any,
+    fastElementOptions?: {
+        shadowOptions?: ShadowRootInit
+    },
     ignorePackaging?: boolean,
     debugPackaging?: boolean
     oreoMode?: boolean
