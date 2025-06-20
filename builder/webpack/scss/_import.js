@@ -23,7 +23,7 @@ function processImportPath(importPath, rwsWorkspaceDir, appRootDir, fileRootDir 
     }
 
     if (importPath.indexOf('@workspace') === 0) {    
-        return path.join(workspaceDir, importPath.replace('@workspace', ''));
+        return path.join(workspaceDir, 'src', importPath.replace('@workspace', ''));
     }
 
     if (importPath.indexOf('@public') === 0) {     

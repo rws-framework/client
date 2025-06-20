@@ -5,6 +5,7 @@ import UtilsService, { UtilsServiceInstance } from '../services/UtilsService';
 import DOMService, { DOMServiceInstance, DOMOutputType } from '../services/DOMService';
 import ApiService, { ApiServiceInstance } from '../services/ApiService';
 import NotifyService, { NotifyServiceInstance } from '../services/NotifyService';
+import IndexedDBService, { IndexedDBServiceInstance } from '../services/IndexedDBService';
 import { IRWSViewComponent, IAssetShowOptions } from '../types/IRWSViewComponent';
 import RWSWindow, { RWSWindowComponentInterface, loadRWSRichWindow } from '../types/RWSWindow';
 import { applyConstructor, RWSInject } from './_decorator';
@@ -14,22 +15,24 @@ import { IFastDefinition, isDefined, defineComponent, getDefinition } from './_d
 import { on, $emitDown, observe, sendEventToOutside } from './_event_handling';
 
 type ComposeMethodType<
-    T extends FoundationElementDefinition, 
+    T extends FoundationElementDefinition,
     K extends Constructable<RWSViewComponent>
 > = (this: K, elementDefinition: T) => (overrideDefinition?: OverrideFoundationElementDefinition<T>) => FoundationElementRegistry<FoundationElementDefinition, T>;
 
+type CSSInjectMode = 'adopted' | 'legacy' | 'both';
+
 export interface IWithCompose<T extends RWSViewComponent> {
     [key: string]: any
-    new (...args: any[]): T;
+    new(...args: any[]): T;
     definition?: IFastDefinition
     defineComponent: <T extends RWSViewComponent>(this: IWithCompose<T>) => void
     isDefined<T extends RWSViewComponent>(this: IWithCompose<T>): boolean
     compose: ComposeMethodType<FoundationElementDefinition, Constructable<T>>;
     define<TType extends (...params: any[]) => any>(type: TType, nameOrDef?: string | PartialFASTElementDefinition | undefined): TType;
     _verbose: boolean;
-    _toInject: {[key: string]: TheRWSService};
-    _depKeys: {[key: string]: string[]};
-    _externalAttrs: { [key:string]: string[] };
+    _toInject: { [key: string]: TheRWSService };
+    _depKeys: { [key: string]: string[] };
+    _externalAttrs: { [key: string]: string[] };
     setExternalAttr: (componentName: string, key: string) => void
     sendEventToOutside: <T>(eventName: string, data: T) => void
     _EVENTS: {
@@ -48,35 +51,39 @@ abstract class RWSViewComponent extends FoundationElement implements IRWSViewCom
 
     static autoLoadFastElement = true;
     static _defined: { [key: string]: boolean } = {};
-    static _toInject: {[key: string]: TheRWSService} = {};
-    static _depKeys: {[key: string]: string[]} = {_all: []};
+    static _toInject: { [key: string]: TheRWSService } = {};
+    static _depKeys: { [key: string]: string[] } = { _all: [] };
     static _externalAttrs: { [key: string]: string[] } = {};
     static _verbose: boolean = false;
+
+    private static FORCE_INJECT_STYLES?: string[] = [];
+    private static FORCE_INJECT_MODE?: CSSInjectMode = 'adopted';
 
     static _EVENTS = {
         component_define: 'rws:lifecycle:defineComponent',
         component_parted_load: 'rws:lifecycle:loadPartedComponents',
     }
 
-    @RWSInject(ConfigService, true) protected config: ConfigServiceInstance;    
+    @RWSInject(IndexedDBService, true) protected indexedDBService: IndexedDBServiceInstance;
+    @RWSInject(ConfigService, true) protected config: ConfigServiceInstance;
     @RWSInject(DOMService, true) protected domService: DOMServiceInstance;
     @RWSInject(UtilsService, true) protected utilsService: UtilsServiceInstance;
-    @RWSInject(ApiService, true) protected apiService: ApiServiceInstance;    
+    @RWSInject(ApiService, true) protected apiService: ApiServiceInstance;
     @RWSInject(NotifyService, true) protected notifyService: NotifyServiceInstance;
 
     @observable trashIterator: number = 0;
     @observable fileAssets: {
         [key: string]: ViewTemplate
-    } = {};    
+    } = {};
 
     constructor() {
-        super();       
-        applyConstructor(this);       
+        super();
+        applyConstructor(this);
     }
 
-    connectedCallback() {        
-        super.connectedCallback();        
-        applyConstructor(this);    
+    connectedCallback() {
+        super.connectedCallback();
+        applyConstructor(this);
 
         if (!(this.constructor as IWithCompose<this>).definition && (this.constructor as IWithCompose<this>).autoLoadFastElement) {
             throw new Error('RWS component is not named. Add `static definition = {name, template};`');
@@ -84,8 +91,12 @@ abstract class RWSViewComponent extends FoundationElement implements IRWSViewCom
 
         this.applyFileList();
 
+        if (RWSViewComponent.FORCE_INJECT_STYLES) {
+            this.injectStyles(RWSViewComponent.FORCE_INJECT_STYLES, RWSViewComponent.FORCE_INJECT_MODE);
+        }
+
         RWSViewComponent.instances.push(this);
-    }    
+    }
 
     passRouteParams(routeParams: Record<string, string> = null) {
         if (routeParams) {
@@ -111,8 +122,7 @@ abstract class RWSViewComponent extends FoundationElement implements IRWSViewCom
         return $emitDown.bind(this)(eventName, payload);
     }
 
-    observe(callback: (component: RWSViewComponent, node: Node, observer: MutationObserver) => Promise<void>, condition: (component: RWSViewComponent, node: Node) => boolean = null, observeRemoved: boolean = false)
-    {
+    observe(callback: (component: RWSViewComponent, node: Node, observer: MutationObserver) => Promise<void>, condition: (component: RWSViewComponent, node: Node) => boolean = null, observeRemoved: boolean = false) {
         return observe.bind(this)(callback, condition, observeRemoved);
     }
 
@@ -187,8 +197,15 @@ abstract class RWSViewComponent extends FoundationElement implements IRWSViewCom
         sendEventToOutside(eventName, data);
     }
 
-    private applyFileList(): void
-    {
+    static injectStyles(linkedStyles: string[], mode?: CSSInjectMode) {
+        if (mode) {
+            RWSViewComponent.FORCE_INJECT_MODE = mode;
+        }
+
+        RWSViewComponent.FORCE_INJECT_STYLES = linkedStyles;
+    }
+
+    private applyFileList(): void {
         try {
             (this.constructor as IWithCompose<this>).fileList.forEach((file: string) => {
                 if (this.fileAssets[file]) {
@@ -203,11 +220,10 @@ abstract class RWSViewComponent extends FoundationElement implements IRWSViewCom
             console.error('Error loading file content:', e.message);
             console.error(e.stack);
         }
-    }   
+    }
 
-    static setExternalAttr(componentName: string, key: string)
-    {
-        if(!Object.keys(RWSViewComponent._externalAttrs).includes(componentName)){
+    static setExternalAttr(componentName: string, key: string) {
+        if (!Object.keys(RWSViewComponent._externalAttrs).includes(componentName)) {
             RWSViewComponent._externalAttrs[componentName] = [];
         }
 
@@ -218,23 +234,72 @@ abstract class RWSViewComponent extends FoundationElement implements IRWSViewCom
         this.getInstances().forEach(instance => instance.forceReload());
     }
 
-    static isDefined<T extends RWSViewComponent>(this: IWithCompose<T>): boolean 
-    {
+    static isDefined<T extends RWSViewComponent>(this: IWithCompose<T>): boolean {
         return isDefined<T>(this);
     }
 
-    static defineComponent<T extends RWSViewComponent>(this: IWithCompose<T>): void
-    {
+    static defineComponent<T extends RWSViewComponent>(this: IWithCompose<T>): void {
         return defineComponent<T>(this);
     }
 
-    static getDefinition(tagName: string, htmlTemplate: ViewTemplate, styles: ElementStyles = null) 
-    {
+    static getDefinition(tagName: string, htmlTemplate: ViewTemplate, styles: ElementStyles = null) {
         return getDefinition(tagName, htmlTemplate, styles);
     }
 
     private static getInstances(): RWSViewComponent[] {
         return RWSViewComponent.instances;
+    }
+
+    protected async injectStyles(styleLinks: string[], mode: CSSInjectMode = 'adopted') {
+        const dbName = 'css-cache';
+        const storeName = 'styles';
+        const db = await this.indexedDBService.openDB(dbName, storeName);
+
+        let adoptedSheets: CSSStyleSheet[] = [];
+
+        for (const styleLink of styleLinks) {
+            if (mode === 'legacy' || mode === 'both') {
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = styleLink;
+                this.getShadowRoot().appendChild(link);
+            }
+
+            if (mode === 'adopted' || mode === 'both') {
+                const entry = await this.indexedDBService.getFromDB(db, storeName, styleLink);
+                const maxAgeMs = 1000 * 60 * 60 * 24; // 24h
+
+                let cssText: string | null = null;
+
+                if (entry && typeof entry === 'object' && 'css' in entry && 'timestamp' in entry) {
+                    const expired = Date.now() - entry.timestamp > maxAgeMs;
+                    if (!expired) {
+                        cssText = entry.css;
+                    }
+                }
+
+                if (!cssText) {
+                    cssText = await fetch(styleLink).then(res => res.text());
+                    await this.indexedDBService.saveToDB(db, storeName, styleLink, {
+                        css: cssText,
+                        timestamp: Date.now()
+                    });
+                    console.log(`System saved stylesheet: ${styleLink} to IndexedDB`)
+                }
+
+                const sheet = new CSSStyleSheet();
+                await sheet.replace(cssText);
+
+                adoptedSheets.push(sheet);                
+            }
+        }
+
+        if(adoptedSheets.length){
+            this.getShadowRoot().adoptedStyleSheets = [                
+                ...adoptedSheets,
+                ...this.getShadowRoot().adoptedStyleSheets,
+            ];
+        }
     }
 }
 

@@ -72,9 +72,11 @@ const applyConstructor = (component: RWSViewComponent, x: boolean = false): void
 
     const regServices = loadRWSRichWindow().RWS._registered;
     
+ 
 
     const depsToInject: string[] = (mainConstructor as IWithCompose<RWSViewComponent>)._depKeys[mainConstructor.name] || [];
     const depsInInjector: string[] = Object.keys(existingInjectedDependencies);
+
 
     const toInject: string[] = [...depsToInject]
 
@@ -84,7 +86,7 @@ const applyConstructor = (component: RWSViewComponent, x: boolean = false): void
     
     function inject(services: KeyType){
         for (const prop in services) {
-            const service = (typeof services[prop] === 'string' ? existingInjectedDependencies[prop] : services[prop]) as TheRWSService;      
+            const service = (typeof services[prop] === 'string' ? existingInjectedDependencies[prop] : services[prop]) as TheRWSService;                  
             _target[prop] = service;            
         }
     }
@@ -96,7 +98,7 @@ const applyConstructor = (component: RWSViewComponent, x: boolean = false): void
 
     const defaultDeps: [string, TheRWSService][] = Object.keys(existingInjectedDependencies)
         .filter((depKey: string) => existingInjectedDependencies[depKey].isDefault()).map((depKey => [depKey, existingInjectedDependencies[depKey]]));
-
+        
     inject(defaultDeps.reduce((acc: KeyType, cur: [string, TheRWSService]) => {
         acc[cur[0]] = cur[1];
         return acc;

@@ -8,8 +8,7 @@ import { handleExternalChange } from '../_attrs/_external_handler';
 type InjectDecoratorReturnType = (target: any, key?: string | number | undefined, parameterIndex?: number) => void;
 type TargetType = any;
 
-function addToComponentInjection(targetComponentName: string, constructor: any, depKey: string, dependencyClass: Key, isDefaultService: boolean = false){
-
+function addToComponentInjection(targetComponentName: string, constructor: any, depKey: string, dependencyClass: Key, isDefaultService: boolean = false){    
     if(isDefaultService){
         targetComponentName = '_all';
     }
