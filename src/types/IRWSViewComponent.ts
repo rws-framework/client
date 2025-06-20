@@ -1,9 +1,9 @@
-import { ViewTemplate } from '@microsoft/fast-element';
+import { FASTElement, ViewTemplate } from '@microsoft/fast-element';
 import { DOMOutputType } from '../services/DOMService';
 
 type IAssetShowOptions = Record<string, any>;
 
-interface IRWSViewComponent extends Node {    
+interface IRWSViewComponent extends FASTElement {    
     __isLoading: boolean;
     routeParams: Record<string, string>;
     trashIterator: number;

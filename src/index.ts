@@ -22,7 +22,7 @@ import {  RWSIgnore, RWSInject, RWSView } from './components/_decorator';
 import type { DefaultRWSPluginOptionsType } from './plugins/_plugin';
 import type { IRWSPlugin, IStaticRWSPlugin, IPluginSpawnOption } from './types/IRWSPlugin';
 import type IRWSUser from './types/IRWSUser';
-import type { IAssetShowOptions } from './components/_component';
+import type { IAssetShowOptions, IRWSViewComponent } from './components/_component';
 import type { RWSDecoratorOptions } from './components/_decorator';
 import type { IKDBTypeInfo, IKDBTypesResponse } from './types/IBackendCore';
 import type { DOMOutputType, TagsProcessorType } from './services/DOMService';
@@ -84,5 +84,6 @@ export type {
     IAssetShowOptions as IRWSAssetShowOptions,
     IRWSConfig,
     IRWSUser,
-    TagsProcessorType
+    TagsProcessorType,
+    IRWSViewComponent
 }
