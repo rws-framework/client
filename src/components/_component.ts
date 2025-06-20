@@ -21,6 +21,8 @@ type ComposeMethodType<
 
 type CSSInjectMode = 'adopted' | 'legacy' | 'both';
 
+const _DEFAULT_INJECT_CSS_CACHE_LIMIT_DAYS = 1;
+
 export interface IWithCompose<T extends RWSViewComponent> {
     [key: string]: any
     new(...args: any[]): T;
@@ -250,10 +252,13 @@ abstract class RWSViewComponent extends FoundationElement implements IRWSViewCom
         return RWSViewComponent.instances;
     }
 
-    protected async injectStyles(styleLinks: string[], mode: CSSInjectMode = 'adopted') {
+    protected async injectStyles(styleLinks: string[], mode: CSSInjectMode = 'adopted', maxDaysExp?: number) {
         const dbName = 'css-cache';
         const storeName = 'styles';
         const db = await this.indexedDBService.openDB(dbName, storeName);
+        const maxAgeMs = 1000 * 60 * 60 * 24; // 24h
+        const maxDaysAge = maxDaysExp ? maxDaysExp : _DEFAULT_INJECT_CSS_CACHE_LIMIT_DAYS;
+        const maxAgeDays = maxAgeMs * maxDaysAge;
 
         let adoptedSheets: CSSStyleSheet[] = [];
 
@@ -266,13 +271,12 @@ abstract class RWSViewComponent extends FoundationElement implements IRWSViewCom
             }
 
             if (mode === 'adopted' || mode === 'both') {
-                const entry = await this.indexedDBService.getFromDB(db, storeName, styleLink);
-                const maxAgeMs = 1000 * 60 * 60 * 24; // 24h
+                const entry = await this.indexedDBService.getFromDB(db, storeName, styleLink);                
 
                 let cssText: string | null = null;
 
                 if (entry && typeof entry === 'object' && 'css' in entry && 'timestamp' in entry) {
-                    const expired = Date.now() - entry.timestamp > maxAgeMs;
+                    const expired = Date.now() - entry.timestamp > maxAgeDays;
                     if (!expired) {
                         cssText = entry.css;
                     }
