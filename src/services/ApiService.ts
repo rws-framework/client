@@ -1,4 +1,4 @@
-import { IKDBTypesResponse } from '../types/IBackendCore';
+import { IKDBTypesResponse } from '../../../components/src/types/IBackendCore';
 import TheService from './_service';
 
 //@4DI

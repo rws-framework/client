@@ -24,12 +24,12 @@ import type { IRWSPlugin, IStaticRWSPlugin, IPluginSpawnOption } from './types/I
 import type IRWSUser from './types/IRWSUser';
 import type { IAssetShowOptions, IRWSViewComponent } from './components/_component';
 import type { RWSDecoratorOptions } from './components/_decorator';
-import type { IKDBTypeInfo, IKDBTypesResponse } from './types/IBackendCore';
 import type { DOMOutputType, TagsProcessorType } from './services/DOMService';
 import type { IBackendRoute, IHTTProute, IPrefixedHTTProutes } from './services/ApiService';
 import type IRWSConfig from './types/IRWSConfig';
 import type RWSNotify from './types/RWSNotify';
 import type { NotifyUiType, NotifyLogType }  from './types/RWSNotify';
+import * as RWSEvents from './events';
 
 export default RWSClient;
 
@@ -70,11 +70,12 @@ export {
     RWSService,
     RWSViewComponent,
 
-    RWSContainer
+    RWSContainer,
+
+    RWSEvents
 };
 
-export type {
-    IKDBTypeInfo, IKDBTypesResponse,
+export type {    
     NotifyUiType,
     NotifyLogType,
     IBackendRoute as IRWSBackendRoute,

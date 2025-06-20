@@ -13,6 +13,7 @@ import TheRWSService from '../services/_service';
 import { handleExternalChange } from './_attrs/_external_handler';
 import { IFastDefinition, isDefined, defineComponent, getDefinition } from './_definitions';
 import { on, $emitDown, observe, sendEventToOutside } from './_event_handling';
+import { domEvents } from '../events';
 
 type ComposeMethodType<
     T extends FoundationElementDefinition,
@@ -262,47 +263,71 @@ abstract class RWSViewComponent extends FoundationElement implements IRWSViewCom
 
         let adoptedSheets: CSSStyleSheet[] = [];
 
+        let doneAdded = false;
+
         for (const styleLink of styleLinks) {
-            if (mode === 'legacy' || mode === 'both') {
-                const link = document.createElement('link');
-                link.rel = 'stylesheet';
-                link.href = styleLink;
-                this.getShadowRoot().appendChild(link);
-            }
+            const loadPromise = new Promise<void>(async (resolve, reject) => {
+                if (mode === 'legacy' || mode === 'both') {
+                    const link = document.createElement('link');
+                    link.rel = 'stylesheet';
+                    link.href = styleLink;
+                    this.getShadowRoot().appendChild(link);
+    
+                    link.onload = () => {
+                        doneAdded = true;
 
-            if (mode === 'adopted' || mode === 'both') {
-                const entry = await this.indexedDBService.getFromDB(db, storeName, styleLink);                
+                        if(mode === 'legacy'){
+                            resolve();
+                        }
+                    };
+                }
 
-                let cssText: string | null = null;
+                if (mode === 'adopted' || mode === 'both') {
+                    const entry = await this.indexedDBService.getFromDB(db, storeName, styleLink);
 
-                if (entry && typeof entry === 'object' && 'css' in entry && 'timestamp' in entry) {
-                    const expired = Date.now() - entry.timestamp > maxAgeDays;
-                    if (!expired) {
-                        cssText = entry.css;
+                    let cssText: string | null = null;
+
+                    if (entry && typeof entry === 'object' && 'css' in entry && 'timestamp' in entry) {
+                        const expired = Date.now() - entry.timestamp > maxAgeDays;
+                        if (!expired) {
+                            cssText = entry.css;
+                        }
+                    }
+
+                    if (!cssText) {
+                        cssText = await fetch(styleLink).then(res => res.text());
+                        await this.indexedDBService.saveToDB(db, storeName, styleLink, {
+                            css: cssText,
+                            timestamp: Date.now()
+                        });
+                        console.log(`System saved stylesheet: ${styleLink} to IndexedDB`)
+                    }
+
+                    const sheet = new CSSStyleSheet();
+                    await sheet.replace(cssText);
+
+                    adoptedSheets.push(sheet);
+
+                    if(mode === 'adopted' || mode === 'both'){
+                        resolve();
                     }
                 }
+            });
 
-                if (!cssText) {
-                    cssText = await fetch(styleLink).then(res => res.text());
-                    await this.indexedDBService.saveToDB(db, storeName, styleLink, {
-                        css: cssText,
-                        timestamp: Date.now()
-                    });
-                    console.log(`System saved stylesheet: ${styleLink} to IndexedDB`)
-                }
-
-                const sheet = new CSSStyleSheet();
-                await sheet.replace(cssText);
-
-                adoptedSheets.push(sheet);                
-            }
+            await loadPromise;
         }
 
-        if(adoptedSheets.length){
-            this.getShadowRoot().adoptedStyleSheets = [                
+        if (adoptedSheets.length) {
+            this.getShadowRoot().adoptedStyleSheets = [
                 ...adoptedSheets,
                 ...this.getShadowRoot().adoptedStyleSheets,
             ];
+
+            doneAdded = true;
+        }
+
+        if (doneAdded) {
+            this.$emit(domEvents.loadedLinkedStyles);
         }
     }
 }
