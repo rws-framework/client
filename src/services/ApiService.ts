@@ -1,4 +1,4 @@
-import { IKDBTypesResponse } from '../../../components/src/types/IBackendCore';
+import { ITypesResponse } from '../../../components/src/types/IBackendCore';
 import TheService from './_service';
 
 //@4DI
@@ -20,11 +20,14 @@ interface IAPIOptions {
     routeParams?: {
         [key: string]: string
     }, 
+    queryParams?: {
+        [key: string]: string
+    }
 }
 
 interface IHTTProute<P = {[key: string]: any}> {
     name: string;
-    path: string;  
+    path: string | string[];  
     method: string;
     noParams?: boolean;
     options?: any;
@@ -89,16 +92,16 @@ class ApiService extends TheService {
     public delete = calls.delete;
 
     public back = {
-        get: async <T>(routeName: string, options?: IAPIOptions, token?: string): Promise<T> => calls.get.bind(this)(backend.getBackendUrl.bind(this)(routeName, options?.routeParams), options) as Promise<T>,
-        post: async <T, P extends object = object>(routeName: string, payload?: P, options?: IAPIOptions): Promise<T> => calls.post.bind(this)(backend.getBackendUrl.bind(this)(routeName, options?.routeParams), payload, options) as Promise<T>,
-        put: async <T, P extends object = object>(routeName: string, payload: P, options?: IAPIOptions): Promise<T> => calls.put.bind(this)(backend.getBackendUrl.bind(this)(routeName, options?.routeParams), payload, options) as Promise<T>,
-        delete: async <T>(routeName: string, options?: IAPIOptions): Promise<T> => calls.delete.bind(this)(backend.getBackendUrl.bind(this)(routeName, options?.routeParams), options) as Promise<T>,
+        get: async <T>(routeName: string, options?: IAPIOptions, token?: string): Promise<T> => calls.get.bind(this)(backend.getBackendUrl.bind(this)(routeName, options?.routeParams, options?.queryParams), options) as Promise<T>,
+        post: async <T, P extends object = object>(routeName: string, payload?: P, options?: IAPIOptions): Promise<T> => calls.post.bind(this)(backend.getBackendUrl.bind(this)(routeName, options?.routeParams, options?.queryParams), payload, options) as Promise<T>,
+        put: async <T, P extends object = object>(routeName: string, payload: P, options?: IAPIOptions): Promise<T> => calls.put.bind(this)(backend.getBackendUrl.bind(this)(routeName, options?.routeParams, options?.queryParams), payload, options) as Promise<T>,
+        delete: async <T>(routeName: string, options?: IAPIOptions): Promise<T> => calls.delete.bind(this)(backend.getBackendUrl.bind(this)(routeName, options?.routeParams, options?.queryParams), options) as Promise<T>,
         uploadFile: async (routeName: string, file: File, onProgress: (progress: number) => void, options: IAPIOptions = {}, payload: any = {}): Promise<UploadResponse> => this.uploadFile(backend.getBackendUrl.bind(this)(routeName, options?.routeParams), file, onProgress, payload),
     };
 
-    async getResource(resourceName: string): Promise<IKDBTypesResponse>
+    async getResource(resourceName: string): Promise<ITypesResponse>
     {        
-        return calls.get.bind(this)(`${this.config.get('backendUrl')}${this.config.get('apiPrefix') || ''}/api/rws/resource/${resourceName}`) as Promise<IKDBTypesResponse>
+        return calls.get.bind(this)(`${this.config.get('backendUrl')}${this.config.get('apiPrefix') || ''}/api/rws/resource/${resourceName}`) as Promise<ITypesResponse>
     }
 }
 
