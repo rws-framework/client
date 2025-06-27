@@ -214,7 +214,56 @@ theClient.setBackendRoutes(backendRoutes);
 
 ## Utilizing APIService
 
-`APIService` is used for making HTTP requests to the backend. It supports dynamic types for response and payload.
+`APIService` is used for making HTTP requests to the backend. It supports dynamic types for response and payload, and can be accessed via DI or through the RWS client instance.
+
+### Basic Usage
+
+```typescript
+// Injected in a component or service
+@RWSInject(ApiService, true) protected apiService: ApiServiceInstance;
+
+// Or via the client
+const apiService = window.RWS.client.get('ApiService');
+```
+
+### Making Requests
+
+You can use RESTful methods directly:
+
+```typescript
+// GET request
+apiService.get('/api/some-endpoint');
+
+// POST request with payload
+type MyResponse = { ... };
+type MyPayload = { ... };
+const result = await apiService.post<MyResponse, MyPayload>('/api/some-endpoint', { foo: 'bar' });
+```
+
+### Using Named Backend Routes
+
+If you use named backend routes (from `backendRoutes`):
+
+```typescript
+// By route name (controller:action)
+const data = await apiService.back.get<MyResponse>('user:getProfile', { routeParams: { id: '123' } });
+
+// POST with payload
+type Payload = { name: string };
+const result = await apiService.back.post<MyResponse, Payload>('user:updateProfile', { name: 'John' });
+```
+
+### File Upload Example
+
+```typescript
+await apiService.uploadFile('/api/upload', file, progress => {
+    console.log('Progress:', progress);
+});
+```
+
+### Route Type Safety
+
+If you use `IBackendRoute`/`HTTPRoutes` for your backend route definitions, you get type safety and autocompletion for all API calls.
 
 ## Example: WebChat Component
 

@@ -14,13 +14,12 @@ import { handleExternalChange } from './_attrs/_external_handler';
 import { IFastDefinition, isDefined, defineComponent, getDefinition } from './_definitions';
 import { on, $emitDown, observe, sendEventToOutside } from './_event_handling';
 import { domEvents } from '../events';
+import CSSInjectionManager, { CSSInjectMode, ICSSInjectionOptions } from './_css_injection';
 
 type ComposeMethodType<
     T extends FoundationElementDefinition,
     K extends Constructable<RWSViewComponent>
 > = (this: K, elementDefinition: T) => (overrideDefinition?: OverrideFoundationElementDefinition<T>) => FoundationElementRegistry<FoundationElementDefinition, T>;
-
-type CSSInjectMode = 'adopted' | 'legacy' | 'both';
 
 const _DEFAULT_INJECT_CSS_CACHE_LIMIT_DAYS = 1;
 
@@ -253,82 +252,39 @@ abstract class RWSViewComponent extends FoundationElement implements IRWSViewCom
         return RWSViewComponent.instances;
     }
 
+    static getCachedStyles(styleLinks: string[]): CSSStyleSheet[] {
+        return CSSInjectionManager.getCachedStyles(styleLinks);
+    }
+
+    static hasCachedStyles(styleLinks: string[]): boolean {
+        return CSSInjectionManager.hasCachedStyles(styleLinks);
+    }
+
+    static getStylesOwnerComponent(): any {
+        return CSSInjectionManager.getStylesOwnerComponent();
+    }
+
+    static clearCachedStyles(): void {
+        CSSInjectionManager.clearCachedStyles();
+    }
+
     protected async injectStyles(styleLinks: string[], mode: CSSInjectMode = 'adopted', maxDaysExp?: number) {
-        const dbName = 'css-cache';
-        const storeName = 'styles';
-        const db = await this.indexedDBService.openDB(dbName, storeName);
-        const maxAgeMs = 1000 * 60 * 60 * 24; // 24h
-        const maxDaysAge = maxDaysExp ? maxDaysExp : _DEFAULT_INJECT_CSS_CACHE_LIMIT_DAYS;
-        const maxAgeDays = maxAgeMs * maxDaysAge;
+        // Create a bridge object that exposes the necessary properties
+        const componentBridge = {
+            shadowRoot: this.shadowRoot,
+            indexedDBService: this.indexedDBService,
+            $emit: this.$emit.bind(this)
+        };
+        
+        return CSSInjectionManager.injectStyles(componentBridge, styleLinks, { mode, maxDaysExp });
+    }
 
-        let adoptedSheets: CSSStyleSheet[] = [];
+    protected getInjectedStyles(styleLinks: string[]): CSSStyleSheet[] {
+        return CSSInjectionManager.getCachedStyles(styleLinks);
+    }
 
-        let doneAdded = false;
-
-        for (const styleLink of styleLinks) {
-            const loadPromise = new Promise<void>(async (resolve, reject) => {
-                if (mode === 'legacy' || mode === 'both') {
-                    const link = document.createElement('link');
-                    link.rel = 'stylesheet';
-                    link.href = styleLink;
-                    this.getShadowRoot().appendChild(link);
-    
-                    link.onload = () => {
-                        doneAdded = true;
-
-                        if(mode === 'legacy'){
-                            resolve();
-                        }
-                    };
-                }
-
-                if (mode === 'adopted' || mode === 'both') {
-                    const entry = await this.indexedDBService.getFromDB(db, storeName, styleLink);
-
-                    let cssText: string | null = null;
-
-                    if (entry && typeof entry === 'object' && 'css' in entry && 'timestamp' in entry) {
-                        const expired = Date.now() - entry.timestamp > maxAgeDays;
-                        if (!expired) {
-                            cssText = entry.css;
-                        }
-                    }
-
-                    if (!cssText) {
-                        cssText = await fetch(styleLink).then(res => res.text());
-                        await this.indexedDBService.saveToDB(db, storeName, styleLink, {
-                            css: cssText,
-                            timestamp: Date.now()
-                        });
-                        console.log(`System saved stylesheet: ${styleLink} to IndexedDB`)
-                    }
-
-                    const sheet = new CSSStyleSheet();
-                    await sheet.replace(cssText);
-
-                    adoptedSheets.push(sheet);
-
-                    if(mode === 'adopted' || mode === 'both'){
-                        resolve();
-                    }
-                }
-            });
-
-            await loadPromise;
-        }
-
-        if (adoptedSheets.length) {
-            this.getShadowRoot().adoptedStyleSheets = [
-                ...adoptedSheets,
-                ...this.getShadowRoot().adoptedStyleSheets,
-            ];
-
-            doneAdded = true;
-        }
-
-        if (doneAdded) {
-            this.$emit(domEvents.loadedLinkedStyles);
-        }
+    protected hasInjectedStyles(styleLinks: string[]): boolean {
+        return CSSInjectionManager.hasCachedStyles(styleLinks);
     }
 }
 

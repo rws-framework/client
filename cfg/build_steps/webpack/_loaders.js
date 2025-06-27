@@ -125,7 +125,115 @@ function _extractRWSViewDefs(fastOptions = {}, decoratorArgs = {})
   return [addedParamDefs, addedParams];
 }
 
-function extractRWSViewArgs(content, noReplace = false) {
+function extractRWSViewArgs(content, noReplace = false, filePath = null, addDependency = null, rwsWorkspaceDir = null, appRootDir = null, isDev = false, publicDir = null) {
+  // If this is being called with only basic parameters (backward compatibility)
+  if (filePath === null || addDependency === null) {
+    return extractRWSViewArgsSync(content, noReplace);
+  }
+  
+  // Otherwise, call the async version
+  return extractRWSViewArgsAsync(content, noReplace, filePath, addDependency, rwsWorkspaceDir, appRootDir, isDev, publicDir);
+}
+
+function extractRWSViewArgsSync(content, noReplace = false) {
+  const viewReg = /@RWSView\(\s*["']([^"']+)["'](?:\s*,\s*([\s\S]*?))?\s*\)\s*(.*?\s+)?class\s+([a-zA-Z0-9_-]+)\s+extends\s+RWSViewComponent/gm;
+
+  let m;
+  let tagName = null;
+  let className = null;
+  let classNamePrefix = null;
+  let decoratorArgs = null;
+
+  const _defaultRWSLoaderOptions = {
+    templatePath: 'template.html',
+    stylesPath: 'styles.scss',
+    fastOptions: { shadowOptions: { mode: 'open' } }
+  }
+
+  while ((m = viewReg.exec(content)) !== null) {
+    if (m.index === viewReg.lastIndex) {
+      viewReg.lastIndex++;
+    }
+
+    m.forEach((match, groupIndex) => {
+      if (groupIndex === 1) {
+        tagName = match;
+      }
+
+      if (groupIndex === 2) {
+        if (match) {
+          try {            
+            decoratorArgs = JSON.parse(JSON.stringify(match));
+          } catch(e){
+            console.log(chalk.red('Decorator options parse error: ') + e.message + '\n Problematic line:');
+            console.log(`
+              @RWSView(${tagName}, ${match})
+            `);
+            console.log(chalk.yellowBright(`Decorator options failed to parse for "${tagName}" component.`) + ' { decoratorArgs } defaulting to null.');
+            console.log(match);
+
+            console.error(e);
+
+            throw new Error('Failed parsing @RWSView')
+          }                   
+        }
+      }
+
+      if (groupIndex === 3) {
+        if(match){
+          classNamePrefix = match;
+        }
+      }
+
+      if (groupIndex === 4) {
+        className = match;
+      }
+    });
+  }
+
+  if(!tagName){
+    return null;
+  }
+
+  let processedContent = content;
+  let fastOptions = _defaultRWSLoaderOptions.fastOptions;
+
+  if(decoratorArgs && decoratorArgs !== ''){
+    try {
+      decoratorArgs = json5.parse(decoratorArgs);
+    }catch(e){
+      // ignore parse errors for backward compatibility
+    }
+  }
+
+  if (decoratorArgs && decoratorArgs.fastElementOptions) {
+    fastOptions = decoratorArgs.fastElementOptions;
+  }
+ 
+  let replacedDecorator = null;
+
+  if(!noReplace){    
+    const [addedParamDefs, addedParams] = _extractRWSViewDefs(fastOptions, decoratorArgs);    
+    const replacedViewDecoratorContent = processedContent.replace(
+      viewReg,
+      `@RWSView('$1', null, { template: rwsTemplate, styles${addedParams.length ? ', options: {' + (addedParams.join(', ')) + '}' : ''} })\n$3class $4 extends RWSViewComponent `
+    );
+
+    replacedDecorator = `${addedParamDefs.join('\n')}\n${replacedViewDecoratorContent}`;
+  }
+
+  return {
+    viewDecoratorData: {
+      tagName,
+      className,
+      classNamePrefix,
+      decoratorArgs
+    },
+    replacedDecorator
+  }
+}
+
+async function extractRWSViewArgsAsync(content, noReplace = false, filePath = null, addDependency = null, rwsWorkspaceDir = null, appRootDir = null, isDev = false, publicDir = null) {
   const viewReg = /@RWSView\(\s*["']([^"']+)["'](?:\s*,\s*([\s\S]*?))?\s*\)\s*(.*?\s+)?class\s+([a-zA-Z0-9_-]+)\s+extends\s+RWSViewComponent/gm;
 
   let m;
@@ -206,16 +314,37 @@ function extractRWSViewArgs(content, noReplace = false) {
  
   let replacedDecorator = null;
 
-  if(!noReplace){    
-    const [addedParamDefs, addedParams] = _extractRWSViewDefs(fastOptions, decoratorArgs);    
-    const replacedViewDecoratorContent = processedContent.replace(
+  if(!noReplace && filePath && addDependency){    
+    const [addedParamDefs, addedParams] = _extractRWSViewDefs(fastOptions, decoratorArgs);
+    
+    // Get template name and styles path from decorator args
+    let templateName = null;
+    let stylesPath = null;
+    
+    if(decoratorArgs && decoratorArgs.template){
+        templateName = decoratorArgs.template;
+    }
+    if(decoratorArgs && decoratorArgs.styles){
+        stylesPath = decoratorArgs.styles;
+    }
+    
+    // Generate template and styles
+    const [template, htmlFastImports, templateExists] = await getTemplate(filePath, addDependency, className, templateName, isDev);
+    const styles = await getStyles(filePath, rwsWorkspaceDir, appRootDir, addDependency, templateExists, stylesPath, isDev, publicDir);
+    
+    // Extract original imports (everything before the @RWSView decorator)
+    const beforeDecorator = processedContent.substring(0, processedContent.search(/@RWSView/));
+    const afterDecoratorMatch = processedContent.match(/@RWSView[\s\S]*$/);
+    const afterDecorator = afterDecoratorMatch ? afterDecoratorMatch[0] : '';
+    
+    const replacedViewDecoratorContent = afterDecorator.replace(
       viewReg,
-      `@RWSView('$1', null, { template: rwsTemplate, styles${addedParams.length ? ', options: {' + (addedParams.join(', ')) + '}' : ''} })\n$3class $4 extends RWSViewComponent `
+      `${template}\n${styles}\n${addedParamDefs.join('\n')}\n@RWSView('$1', null, { template: rwsTemplate, styles${addedParams.length ? ', options: {' + (addedParams.join(', ')) + '}' : ''} })\n$3class $4 extends RWSViewComponent `
     );
 
     // console.log({replacedViewDecoratorContent});
 
-    replacedDecorator = `${addedParamDefs.join('\n')}\n${replacedViewDecoratorContent}`;
+    replacedDecorator = `${htmlFastImports ? htmlFastImports + '\n' : ''}${beforeDecorator}${replacedViewDecoratorContent}`;
   }
 
   return {
@@ -290,4 +419,4 @@ let rwsTemplate: any = T.html<${className}>\`${templateContent}\`;
   return [template, htmlFastImports, templateExists];
 }
 
-module.exports = { getRWSLoaders, extractRWSViewArgs, getTemplate, getStyles }
+module.exports = { getRWSLoaders, extractRWSViewArgs, extractRWSViewArgsAsync, getTemplate, getStyles }

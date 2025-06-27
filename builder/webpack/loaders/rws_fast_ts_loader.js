@@ -11,10 +11,17 @@ module.exports = async function(content) {
     let processedContent = content;
     const filePath = this.resourcePath;
     const isDev = this._compiler.options.mode === 'development';       
-    let isIgnored = false;
-    let isDebugged = false;      
     // timingStart('decorator_extraction');
-    const decoratorExtract = LoadersHelper.extractRWSViewArgs(processedContent);    
+    const decoratorExtract = await LoadersHelper.extractRWSViewArgsAsync(
+        processedContent, 
+        false, 
+        filePath, 
+        this.addDependency, 
+        this.query?.rwsWorkspaceDir, 
+        this.query?.appRootDir, 
+        isDev, 
+        this.query?.publicDir
+    );    
     const decoratorData = decoratorExtract ? decoratorExtract.viewDecoratorData : null;
     
     const cachedCode = processedContent;
@@ -34,19 +41,11 @@ module.exports = async function(content) {
         return content;
     }
 
-    let templateName = null;
-    let stylesPath = null;
+    let isIgnored = false;
+    let isDebugged = false;
     
     if(decoratorData.decoratorArgs){                     
         const decoratorArgs = decoratorData.decoratorArgs
-
-        if(decoratorArgs.template){
-            templateName = decoratorData.decoratorArgs.template || null;
-        }
-
-        if(decoratorArgs.styles){
-            stylesPath = decoratorData.decoratorArgs.styles || null;
-        }
         
         if(decoratorArgs.ignorePackaging){
             isIgnored = true;
@@ -64,19 +63,13 @@ module.exports = async function(content) {
 
     try { 
         if(tagName){                                   
-            const [template, htmlFastImports, templateExists] = await LoadersHelper.getTemplate(filePath, this.addDependency, className, templateName, isDev);         
-
-            const styles = await LoadersHelper.getStyles(filePath, this.query?.rwsWorkspaceDir, this.query?.appRootDir,this.addDependency, templateExists, stylesPath, isDev, this.query?.publicDir);  
-
             if(className){                
-                const replacedViewDecoratorContent =  decoratorExtract.replacedDecorator;  
+                const replacedViewDecoratorContent = decoratorExtract.replacedDecorator;  
 
                 if(replacedViewDecoratorContent){
-                    processedContent = `${template}\n${styles}\n${replacedViewDecoratorContent}`;
+                    processedContent = replacedViewDecoratorContent;
                 }                
             }
-            
-            processedContent = `${htmlFastImports ? htmlFastImports + '\n' : ''}${processedContent}`;
         }
 
         const debugTsPath = filePath.replace('.ts','.debug.ts');
