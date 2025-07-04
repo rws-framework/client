@@ -111,7 +111,7 @@ export const backend = {
         let finalRoute = routeName;
 
         if(routeName.indexOf(prefixName) === -1){
-            finalRoute = `${prefixName}:${routeName}`;
+            finalRoute = `${routeName}`;
         }
 
         return finalRoute;
