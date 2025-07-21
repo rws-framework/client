@@ -40,6 +40,7 @@ async function getBuildConfig(rwsFrontBuildConfig, _packageDir){
     devDebug = {..._DEFAULT_DEV_DEBUG, ...devDebug}
 
     const devRouteProxy = BuildConfigurator.get('devRouteProxy') || rwsFrontBuildConfig.devRouteProxy;
+    const extraNodeModules = BuildConfigurator.get('extraNodeModules') || rwsFrontBuildConfig.extraNodeModules;
 
     const tsConfig = await (BuildConfigurator.get('tsConfig') || rwsFrontBuildConfig.tsConfig)(_packageDir, true);
 
@@ -78,7 +79,8 @@ async function getBuildConfig(rwsFrontBuildConfig, _packageDir){
         BuildConfigurator,
         hotReload,
         hotReloadPort,
-        loaderIgnoreExceptions
+        loaderIgnoreExceptions,
+        extraNodeModules
     }
 }
 

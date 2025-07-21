@@ -47,7 +47,8 @@ const RWSWebpackWrapper = async (appRoot, rwsFrontendConfig,  _packageDir) => {
     BuildConfigurator,
     hotReload,
     hotReloadPort,
-    loaderIgnoreExceptions
+    loaderIgnoreExceptions,
+    extraNodeModules
   } = await getBuildConfig(rwsFrontendConfig, _packageDir);
 
   timeLog({ devDebug });
@@ -66,7 +67,8 @@ const RWSWebpackWrapper = async (appRoot, rwsFrontendConfig,  _packageDir) => {
   const WEBPACK_AFTER_ACTIONS = rwsFrontendConfig.actions || [];
   const WEBPACK_AFTER_ERROR_ACTIONS = rwsFrontendConfig.error_actions || [];
 
-  const modules_setup = [path.join(_packageDir, 'node_modules'), path.join(executionDir, 'node_modules'), path.join(tools.findRootWorkspacePath(appRoot), 'node_modules')];
+  const modules_setup = [path.join(_packageDir, 'node_modules'), path.join(executionDir, 'node_modules'), path.join(tools.findRootWorkspacePath(appRoot), 'node_modules'), ...(extraNodeModules || [])];
+
   let optimConfig = null;
   let aliases = rwsFrontendConfig.aliases || {};
   aliases = { ...aliases, ...(await loadAliases(_packageDir, tsConfig,path.resolve(_MAIN_PACKAGE, 'node_modules'), executionDir))}  
