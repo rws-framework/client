@@ -93,7 +93,7 @@ abstract class RWSViewComponent extends FoundationElement implements IRWSViewCom
 
         this.applyFileList();
 
-        if (RWSViewComponent.FORCE_INJECT_STYLES) {
+        if (RWSViewComponent.FORCE_INJECT_STYLES && RWSViewComponent.FORCE_INJECT_STYLES.length > 0) {
             this.injectStyles(RWSViewComponent.FORCE_INJECT_STYLES, RWSViewComponent.FORCE_INJECT_MODE);
         }
 

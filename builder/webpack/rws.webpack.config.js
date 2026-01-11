@@ -50,6 +50,14 @@ const RWSWebpackWrapper = async (appRoot, rwsFrontendConfig,  _packageDir) => {
     loaderIgnoreExceptions,
     extraNodeModules
   } = await getBuildConfig(rwsFrontendConfig, _packageDir);
+ 
+  console.verboseLog = console.log;
+
+  console.log = (...x) => {
+    if(process.argv.find(a => a.includes('--verbose'))){
+        console.verboseLog(...x);
+    }
+  }
 
   timeLog({ devDebug });
 
@@ -84,12 +92,12 @@ const RWSWebpackWrapper = async (appRoot, rwsFrontendConfig,  _packageDir) => {
 
    // #SECTION RWS COMPONENT SCAN && PARTED PROCESSING
   const RWSComponents = scanComponents(await partedComponentsEvents(partedComponentsLocations, rwsPlugins, isParted), executionDir, _packageDir);
-  console.log(`${chalk.cyanBright('RWS Scanned')} ${chalk.yellowBright(RWSComponents.length)} components`);
+  console.verboseLog(`${chalk.cyanBright('RWS Scanned')} ${chalk.yellowBright(RWSComponents.length)} components`);
   const { automatedChunks, automatedEntries } = setComponentsChunks(rwsFrontendConfig.entrypoint, RWSComponents, isParted);
 
   // #SECTION RWS INFO FILE
   generateRWSInfoFile(outputDir, automatedEntries);
-  console.log(chalk.greenBright(`RWSInfo file generated.`));
+  console.verboseLog(chalk.greenBright(`RWSInfo file generated.`));
 
 
   if (!isDev) {
@@ -144,17 +152,28 @@ const RWSWebpackWrapper = async (appRoot, rwsFrontendConfig,  _packageDir) => {
     loaderIgnoreExceptions
 });  
 
+  let optimization = {
+    // splitChunks: {
+    //   chunks: 'all'
+    // }
+  }
 
   if (optimConfig) {
-    // setup production config if it got created above
-    cfgExport.optimization = optimConfig;
+    optimization = {...optimization, ...optimConfig}
   }
+
+  cfgExport.optimization = optimization;
+
 
   // #SECTION RWS PLUGINS onBuild EVENTS FIRE
   for (const pluginKey of Object.keys(rwsPlugins)) {
     const plugin = rwsPlugins[pluginKey];
     await plugin.onBuild(cfgExport);
-  }
+  }  
+  
+  console.log('Aliases:', cfgExport.resolve.alias)
+
+  console.log('Optim:', optimization)
 
   return cfgExport;
 }

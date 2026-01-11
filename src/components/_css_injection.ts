@@ -50,7 +50,12 @@ export class CSSInjectionManager {
             throw new Error('Component must have a shadow root for CSS injection');
         }
 
-        // Add initial transition styles to host element
+        // Only proceed if there are actually styles to inject
+        if (!styleLinks || styleLinks.length === 0) {
+            return;
+        }
+
+        // Add initial transition styles to host element only when injecting styles
         const transitionSheet = new CSSStyleSheet();
         await transitionSheet.replace(`
             :host {

@@ -5,7 +5,7 @@ const util = require('util');
 
 module.exports = {
     start: (executionDir, tsConfig, outputDir, isDev, publicDir, isParted, partedPrefix, partedDirUrlPrefix, devTools, rwsPlugins) => {        
-        console.log(chalk.green('RWS Frontend build started with:'), {
+        console.verboseLog(chalk.green('RWS Frontend build started with:'), {
         executionDir,        
         outputDir,
         dev: isDev,
