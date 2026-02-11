@@ -104,9 +104,7 @@ class ApiService extends TheService {
         return calls.get.bind(this)(`${this.config.get('backendUrl')}${this.config.get('apiPrefix') || ''}/api/rws/resource/${resourceName}`) as Promise<ITypesResponse>
     }
 
-    getBackendUrl(){
-        return backend.getBackendUrl.bind(this);
-    }
+    getBackendUrl = backend.getBackendUrl.bind(this);
 }
 
 export default ApiService.getSingleton();
