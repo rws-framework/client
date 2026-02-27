@@ -30,7 +30,7 @@ import type IRWSConfig from './types/IRWSConfig';
 import type RWSNotify from './types/RWSNotify';
 import type { NotifyUiType, NotifyLogType }  from './types/RWSNotify';
 import * as RWSEvents from './events';
-
+import { CSSInjectMode } from './components/_css_injection';
 export default RWSClient;
 
 export { 
@@ -75,7 +75,8 @@ export {
     RWSEvents
 };
 
-export type {    
+export type {   
+    CSSInjectMode, 
     NotifyUiType,
     NotifyLogType,
     IBackendRoute as IRWSBackendRoute,

@@ -1,7 +1,8 @@
 import { domEvents } from '../events';
 import IndexedDBService, { IndexedDBServiceInstance } from '../services/IndexedDBService';
+import RWSViewComponent from './_component';
 
-type CSSInjectMode = 'adopted' | 'legacy' | 'both';
+type CSSInjectMode = 'adopted' | 'legacy' | 'both' | 'style-element';
 
 const _DEFAULT_INJECT_CSS_CACHE_LIMIT_DAYS = 1;
 
@@ -11,6 +12,7 @@ interface ICSSInjectionOptions {
 }
 
 interface ICSSInjectionComponent {
+    componentElement?: RWSViewComponent;
     shadowRoot: ShadowRoot | null;
     indexedDBService: IndexedDBServiceInstance;
     $emit(eventName: string): void;
@@ -44,7 +46,6 @@ export class CSSInjectionManager {
         styleLinks: string[], 
         options: ICSSInjectionOptions = {}
     ): Promise<void> {
-        const { mode = 'adopted', maxDaysExp } = options;
 
         if (!component.shadowRoot) {
             throw new Error('Component must have a shadow root for CSS injection');
@@ -63,10 +64,34 @@ export class CSSInjectionManager {
                 transition: opacity 0.3s ease-in-out;
             }
         `);
+        
         component.shadowRoot.adoptedStyleSheets = [
             transitionSheet,
             ...component.shadowRoot.adoptedStyleSheets,
         ];
+
+        const doneAdded = await CSSInjectionManager.addConstructedStyleSheets(component, styleLinks, options);
+
+        if (doneAdded) {
+            // Set opacity to 1 to fade in the component
+            const opacitySheet = new CSSStyleSheet();
+            await opacitySheet.replace(`
+                :host {
+                    opacity: 1 !important;
+                }
+            `);
+            component.shadowRoot.adoptedStyleSheets = [
+                opacitySheet,
+                ...component.shadowRoot.adoptedStyleSheets,
+            ];
+
+            component.$emit(domEvents.loadedLinkedStyles);
+        }
+    }
+
+    private static async addConstructedStyleSheets(component: ICSSInjectionComponent, styleLinks: string[], options: ICSSInjectionOptions = {}): Promise<boolean>
+    {
+        const { mode = 'adopted', maxDaysExp } = options;        
 
         let adoptedSheets: CSSStyleSheet[] = [];
         let doneAdded = false;
@@ -75,12 +100,19 @@ export class CSSInjectionManager {
         const cachedSheets: CSSStyleSheet[] = [];
         const uncachedLinks: string[] = [];
 
+        let hasCached = false;
+
         for (const styleLink of styleLinks) {
             if (CSSInjectionManager.CACHED_STYLES.has(styleLink)) {
                 cachedSheets.push(CSSInjectionManager.CACHED_STYLES.get(styleLink)!);
+                hasCached = true;
             } else {
                 uncachedLinks.push(styleLink);
             }
+        }
+
+        if(hasCached){
+            CSSInjectionManager.setStylesOwner(component);
         }
 
         // If we have cached styles, use them immediately
@@ -92,9 +124,7 @@ export class CSSInjectionManager {
         // Only process uncached styles
         if (uncachedLinks.length > 0) {
             // Set this component as the owner if no owner exists yet
-            if (!CSSInjectionManager.STYLES_OWNER_COMPONENT) {
-                CSSInjectionManager.STYLES_OWNER_COMPONENT = component;
-            }
+            CSSInjectionManager.setStylesOwner(component);
 
             const dbName = 'css-cache';
             const storeName = 'styles';
@@ -105,7 +135,9 @@ export class CSSInjectionManager {
 
             for (const styleLink of uncachedLinks) {
                 const loadPromise = new Promise<void>(async (resolve, reject) => {
-                    if (mode === 'legacy' || mode === 'both') {
+                    const linkMode = Object.keys(RWSViewComponent.FORCE_INJECT_MODE_PER_LINK).includes(styleLink) ? RWSViewComponent.FORCE_INJECT_MODE_PER_LINK[styleLink] : mode;
+
+                    if (linkMode === 'legacy' || linkMode === 'both') {
                         const link = document.createElement('link');
                         link.rel = 'stylesheet';
                         link.href = styleLink;
@@ -114,13 +146,45 @@ export class CSSInjectionManager {
                         link.onload = () => {
                             doneAdded = true;
 
-                            if(mode === 'legacy'){
+                            if(linkMode === 'legacy'){
                                 resolve();
                             }
                         };
                     }
 
-                    if (mode === 'adopted' || mode === 'both') {
+                    if (linkMode === 'style-element') {
+                        const entry = await component.indexedDBService.getFromDB(db, storeName, styleLink);
+
+                        let cssText: string | null = null;
+
+                        if (entry && typeof entry === 'object' && 'css' in entry && 'timestamp' in entry) {
+                            const expired = Date.now() - entry.timestamp > maxAgeDays;
+                            if (!expired) {
+                                cssText = entry.css;
+                            }
+                        }
+
+                        if (!cssText) {
+                            cssText = await fetch(styleLink).then(res => res.text());
+                            await component.indexedDBService.saveToDB(db, storeName, styleLink, {
+                                css: cssText,
+                                timestamp: Date.now()
+                            });
+                            console.log(`System saved stylesheet: ${styleLink} to IndexedDB`)
+                        }
+
+                        // Create style element and add to host
+                        if (component.componentElement) {
+                            const styleElement = document.createElement('style');
+                            styleElement.textContent = cssText;                            
+                            component.componentElement.appendChild(styleElement);
+                            doneAdded = true;
+                        }
+
+                        resolve();
+                    }
+
+                    if (linkMode === 'adopted' || linkMode === 'both') {
                         const entry = await component.indexedDBService.getFromDB(db, storeName, styleLink);
 
                         let cssText: string | null = null;
@@ -149,7 +213,7 @@ export class CSSInjectionManager {
 
                         adoptedSheets.push(sheet);
 
-                        if(mode === 'adopted' || mode === 'both'){
+                        if(linkMode === 'adopted' || linkMode === 'both'){
                             resolve();
                         }
                     }
@@ -170,20 +234,13 @@ export class CSSInjectionManager {
             doneAdded = true;
         }
 
-        if (doneAdded) {
-            // Set opacity to 1 to fade in the component
-            const opacitySheet = new CSSStyleSheet();
-            await opacitySheet.replace(`
-                :host {
-                    opacity: 1 !important;
-                }
-            `);
-            component.shadowRoot.adoptedStyleSheets = [
-                opacitySheet,
-                ...component.shadowRoot.adoptedStyleSheets,
-            ];
+        return doneAdded;
+    }
 
-            component.$emit(domEvents.loadedLinkedStyles);
+    private static setStylesOwner(component: ICSSInjectionComponent): void {
+        if (!CSSInjectionManager.STYLES_OWNER_COMPONENT) {
+            CSSInjectionManager.STYLES_OWNER_COMPONENT = component;
+            console.log({component});
         }
     }
 }

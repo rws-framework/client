@@ -58,8 +58,9 @@ abstract class RWSViewComponent extends FoundationElement implements IRWSViewCom
     static _externalAttrs: { [key: string]: string[] } = {};
     static _verbose: boolean = false;
 
-    private static FORCE_INJECT_STYLES?: string[] = [];
-    private static FORCE_INJECT_MODE?: CSSInjectMode = 'adopted';
+    static FORCE_INJECT_STYLES?: string[] = [];
+    static FORCE_INJECT_MODE?: CSSInjectMode = 'adopted';
+    static FORCE_INJECT_MODE_PER_LINK?: Record<string, CSSInjectMode> = {};
 
     static _EVENTS = {
         component_define: 'rws:lifecycle:defineComponent',
@@ -271,6 +272,7 @@ abstract class RWSViewComponent extends FoundationElement implements IRWSViewCom
     protected async injectStyles(styleLinks: string[], mode: CSSInjectMode = 'adopted', maxDaysExp?: number) {
         // Create a bridge object that exposes the necessary properties
         const componentBridge = {
+            componentElement: this,
             shadowRoot: this.shadowRoot,
             indexedDBService: this.indexedDBService,
             $emit: this.$emit.bind(this)
