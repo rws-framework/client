@@ -70,7 +70,7 @@ export class CSSInjectionManager {
             ...component.shadowRoot.adoptedStyleSheets,
         ];
 
-        const doneAdded = await CSSInjectionManager.addConstructedStyleSheets(component, styleLinks, options);
+        const doneAdded = await CSSInjectionManager.addStyleSheets(component, styleLinks, options);        
 
         if (doneAdded) {
             // Set opacity to 1 to fade in the component
@@ -89,7 +89,7 @@ export class CSSInjectionManager {
         }
     }
 
-    private static async addConstructedStyleSheets(component: ICSSInjectionComponent, styleLinks: string[], options: ICSSInjectionOptions = {}): Promise<boolean>
+    private static async addStyleSheets(component: ICSSInjectionComponent, styleLinks: string[], options: ICSSInjectionOptions = {}): Promise<boolean>
     {
         const { mode = 'adopted', maxDaysExp } = options;        
 
@@ -134,88 +134,41 @@ export class CSSInjectionManager {
             const maxAgeDays = maxAgeMs * maxDaysAge;
 
             for (const styleLink of uncachedLinks) {
-                const loadPromise = new Promise<void>(async (resolve, reject) => {
-                    const linkMode = Object.keys(RWSViewComponent.FORCE_INJECT_MODE_PER_LINK).includes(styleLink) ? RWSViewComponent.FORCE_INJECT_MODE_PER_LINK[styleLink] : mode;
-
-                    if (linkMode === 'legacy' || linkMode === 'both') {
-                        const link = document.createElement('link');
-                        link.rel = 'stylesheet';
-                        link.href = styleLink;
-                        component.shadowRoot!.appendChild(link);
-        
-                        link.onload = () => {
-                            doneAdded = true;
-
-                            if(linkMode === 'legacy'){
+                const linkMode = Object.keys(RWSViewComponent.FORCE_INJECT_MODE_PER_LINK).includes(styleLink) ? RWSViewComponent.FORCE_INJECT_MODE_PER_LINK[styleLink] : mode;
+                
+                const loadPromise = new Promise<void>(async (resolve) => {
+                    try {
+                        if (linkMode === 'legacy') {
+                            await CSSInjectionManager.injectLegacyStyle(component, styleLink, () => {
+                                doneAdded = true;
                                 resolve();
-                            }
-                        };
-                    }
-
-                    if (linkMode === 'style-element') {
-                        const entry = await component.indexedDBService.getFromDB(db, storeName, styleLink);
-
-                        let cssText: string | null = null;
-
-                        if (entry && typeof entry === 'object' && 'css' in entry && 'timestamp' in entry) {
-                            const expired = Date.now() - entry.timestamp > maxAgeDays;
-                            if (!expired) {
-                                cssText = entry.css;
-                            }
-                        }
-
-                        if (!cssText) {
-                            cssText = await fetch(styleLink).then(res => res.text());
-                            await component.indexedDBService.saveToDB(db, storeName, styleLink, {
-                                css: cssText,
-                                timestamp: Date.now()
                             });
-                            console.log(`System saved stylesheet: ${styleLink} to IndexedDB`)
-                        }
-
-                        // Create style element and add to host
-                        if (component.componentElement) {
-                            const styleElement = document.createElement('style');
-                            styleElement.textContent = cssText;                            
-                            component.componentElement.appendChild(styleElement);
+                        } else if (linkMode === 'style-element') {
+                            await CSSInjectionManager.injectStyleElement(component, styleLink, db, storeName, maxAgeDays);
                             doneAdded = true;
-                        }
-
-                        resolve();
-                    }
-
-                    if (linkMode === 'adopted' || linkMode === 'both') {
-                        const entry = await component.indexedDBService.getFromDB(db, storeName, styleLink);
-
-                        let cssText: string | null = null;
-
-                        if (entry && typeof entry === 'object' && 'css' in entry && 'timestamp' in entry) {
-                            const expired = Date.now() - entry.timestamp > maxAgeDays;
-                            if (!expired) {
-                                cssText = entry.css;
-                            }
-                        }
-
-                        if (!cssText) {
-                            cssText = await fetch(styleLink).then(res => res.text());
-                            await component.indexedDBService.saveToDB(db, storeName, styleLink, {
-                                css: cssText,
-                                timestamp: Date.now()
-                            });
-                            console.log(`System saved stylesheet: ${styleLink} to IndexedDB`)
-                        }
-
-                        const sheet = new CSSStyleSheet();
-                        await sheet.replace(cssText);
-
-                        // Cache the stylesheet for future use
-                        CSSInjectionManager.CACHED_STYLES.set(styleLink, sheet);
-
-                        adoptedSheets.push(sheet);
-
-                        if(linkMode === 'adopted' || linkMode === 'both'){
+                            resolve();
+                        } else if (linkMode === 'adopted') {
+                            const sheet = await CSSInjectionManager.injectAdoptedStyle(component, styleLink, db, storeName, maxAgeDays);
+                            adoptedSheets.push(sheet);
+                            doneAdded = true;
+                            resolve();
+                        } else if (linkMode === 'both') {
+                            // Handle both modes
+                            const [sheet] = await Promise.all([
+                                CSSInjectionManager.injectAdoptedStyle(component, styleLink, db, storeName, maxAgeDays),
+                                new Promise<void>((resolveLegacy) => {
+                                    CSSInjectionManager.injectLegacyStyle(component, styleLink, () => {
+                                        resolveLegacy();
+                                    });
+                                })
+                            ]);
+                            adoptedSheets.push(sheet);
+                            doneAdded = true;
                             resolve();
                         }
+                    } catch (error) {
+                        console.error(`Failed to inject styles for ${styleLink}:`, error);
+                        resolve();
                     }
                 });
 
@@ -235,6 +188,81 @@ export class CSSInjectionManager {
         }
 
         return doneAdded;
+    }
+
+    private static async injectLegacyStyle(
+        component: ICSSInjectionComponent,
+        styleLink: string,
+        onLoad: () => void
+    ): Promise<void> {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = styleLink;
+        link.onload = onLoad;
+        component.shadowRoot!.appendChild(link);
+    }
+
+    private static async injectStyleElement(
+        component: ICSSInjectionComponent,
+        styleLink: string,
+        db: IDBDatabase,
+        storeName: string,
+        maxAgeDays: number
+    ): Promise<void> {
+        const cssText = await CSSInjectionManager.getCachedOrFetchCSS(component, styleLink, db, storeName, maxAgeDays);
+        
+        if (component.componentElement) {
+            const styleElement = document.createElement('style');
+            styleElement.textContent = cssText;
+            component.componentElement.appendChild(styleElement);
+        }
+    }
+
+    private static async injectAdoptedStyle(
+        component: ICSSInjectionComponent,
+        styleLink: string,
+        db: IDBDatabase,
+        storeName: string,
+        maxAgeDays: number
+    ): Promise<CSSStyleSheet> {
+        const cssText = await CSSInjectionManager.getCachedOrFetchCSS(component, styleLink, db, storeName, maxAgeDays);
+        
+        const sheet = new CSSStyleSheet();
+        await sheet.replace(cssText);
+        
+        // Cache the stylesheet for future use
+        CSSInjectionManager.CACHED_STYLES.set(styleLink, sheet);
+        
+        return sheet;
+    }
+
+    private static async getCachedOrFetchCSS(
+        component: ICSSInjectionComponent,
+        styleLink: string,
+        db: IDBDatabase,
+        storeName: string,
+        maxAgeDays: number
+    ): Promise<string> {
+        const entry = await component.indexedDBService.getFromDB(db, storeName, styleLink);
+        let cssText: string | null = null;
+
+        if (entry && typeof entry === 'object' && 'css' in entry && 'timestamp' in entry) {
+            const expired = Date.now() - entry.timestamp > maxAgeDays;
+            if (!expired) {
+                cssText = entry.css;
+            }
+        }
+
+        if (!cssText) {
+            cssText = await fetch(styleLink).then(res => res.text());
+            await component.indexedDBService.saveToDB(db, storeName, styleLink, {
+                css: cssText,
+                timestamp: Date.now()
+            });
+            console.log(`System saved stylesheet: ${styleLink} to IndexedDB`);
+        }
+
+        return cssText;
     }
 
     private static setStylesOwner(component: ICSSInjectionComponent): void {
