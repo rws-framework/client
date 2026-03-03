@@ -10,16 +10,10 @@
     "sourceMap": true,
     "strictNullChecks": false,
     "allowSyntheticDefaultImports": true,
-    "types": [],
     "lib": [
       "DOM",
       "ESNext",
       "WebWorker"
     ]
-  },
-  "exclude": [
-    "node_modules",
-    "**/*.d.ts",
-    "**/node_modules/**",
-  ]
+  }
 }
