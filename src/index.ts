@@ -25,7 +25,7 @@ import type IRWSUser from './types/IRWSUser';
 import type { IAssetShowOptions, IRWSViewComponent } from './components/_component';
 import type { RWSDecoratorOptions } from './components/_decorator';
 import type { DOMOutputType, TagsProcessorType } from './services/DOMService';
-import type { IBackendRoute, IHTTProute, IPrefixedHTTProutes } from './services/ApiService';
+import type { IBackendRoute, IHTTProute, IPrefixedHTTProutes, UploadFunctionOptions } from './services/ApiService';
 import type IRWSConfig from './types/IRWSConfig';
 import type RWSNotify from './types/RWSNotify';
 import type { NotifyUiType, NotifyLogType }  from './types/RWSNotify';
@@ -87,5 +87,6 @@ export type {
     IRWSConfig,
     IRWSUser,
     TagsProcessorType,
-    IRWSViewComponent
+    IRWSViewComponent,
+    UploadFunctionOptions as IRWSUploadFunctionOptions
 }
