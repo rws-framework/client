@@ -7,7 +7,7 @@ const packageNames = [
 ];
 
 async function loadAliases(packageDir, tsConfig, nodeModulesPath, executionDir){  
-    
+    console.log({packageDir, tsConfig, nodeModulesPath, executionDir})
     const tsPaths = {}
 
     for(const aliasKey of Object.keys(tsConfig.config.compilerOptions.paths)){
@@ -18,16 +18,10 @@ async function loadAliases(packageDir, tsConfig, nodeModulesPath, executionDir){
     for(const pkgName of packageNames){
         const symlinkPath = path.join(nodeModulesPath, '@rws-framework', pkgName);
 
-        if(fs.existsSync(symlinkPath)){
-            const pkgDirStat = fs.lstatSync(symlinkPath);          
-        
-            if(pkgDirStat.isSymbolicLink()){   
-                const targetPath = await fs.promises.realpath(symlinkPath);                
+        const targetPath = await fs.promises.realpath(symlinkPath);                
                 
-                tsPaths['@rws-framework/' + pkgName + '/*'] = targetPath + '/*';
-                tsPaths['@rws-framework/' + pkgName] = targetPath + '/src/index.ts';
-            }
-        }
+        tsPaths['@rws-framework/' + pkgName + '/*'] = targetPath + '/*';
+        tsPaths['@rws-framework/' + pkgName] = targetPath + '/src/index.ts';
     }
 
     return {        
