@@ -18,22 +18,22 @@ interface IAPIOptions {
     headers?: Headers,
     routeParams?: {
         [key: string]: string
-    }, 
+    },
     queryParams?: {
         [key: string]: string
     }
 }
 
-interface IHTTProute<P = {[key: string]: any}> {
+interface IHTTProute<P = { [key: string]: any }> {
     name: string;
-    path: string | string[];  
+    path: string | string[];
     method: string;
     noParams?: boolean;
     options?: any;
     plugins?: P
 }
 
-interface IPrefixedHTTProutes<P = {[key: string]: any}> {
+interface IPrefixedHTTProutes<P = { [key: string]: any }> {
     prefix: string;
     controllerName: string;
     exportAutoRoutes?: boolean,
@@ -49,16 +49,9 @@ interface UploadFunctionOptions {
     onProgress?: (progress: number) => void;
 }
 
-interface UploadResponse {
-    success: boolean;
-    data?: any;
-    error?: string;
-}
-
-
 class ApiService extends TheService {
     static _DEFAULT: boolean = true;
-    public token?: string;    
+    public token?: string;
 
     private defaultUploadOptions: () => UploadFunctionOptions = () => ({
         headers: this.token ? { Authorization: `Bearer ${this.token}` } : {},
@@ -67,76 +60,65 @@ class ApiService extends TheService {
     });
 
     constructor(@ConfigService public config: ConfigServiceInstance) {
-        super();        
+        super();
     }
 
-    public setToken(token: string)
-    {
+    public setToken(token: string) {
         this.token = token;
     }
 
-    
+
 
     public async isGetTargetReachable(url: string, options: IAPIOptions = {}): Promise<boolean> {
-        try {    
+        try {
             return !!(await calls.pureGet.bind(this)(url, options));
         } catch (error) {
             return false;
         }
-    }    
+    }
 
-    async uploadFile(url: string, files: Record<string, File>, payload: any = {}, uploadOptions: UploadFunctionOptions = this.defaultUploadOptions()): Promise<UploadResponse>
-    {        
+    async uploadFiles<T = any, P = any>(url: string, files: Record<string, File>, payload: P = undefined, uploadOptions: UploadFunctionOptions = this.defaultUploadOptions()): Promise<T> {
         const formData = new FormData();
-        
+
         // Add files to FormData
         Object.entries(files).forEach(([key, file]) => {
             formData.append(key, file);
         });
-        
+
         // Add payload data to FormData
-        Object.entries(payload).forEach(([key, value]) => {
+        if(payload){
+            Object.entries(payload).forEach(([key, value]) => {
             if (value !== undefined && value !== null) {
                 formData.append(key, typeof value === 'object' ? JSON.stringify(value) : String(value));
             }
         });
-        
+        }        
+
         const options = {
             ...this.defaultUploadOptions(),
             ...uploadOptions
         };
-        
-        try {
-            const method = options.method || 'POST';
-            
-            const axiosConfig = {
-                method: method.toLowerCase() as any,
-                url,
-                data: formData,
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    ...options.headers
-                },
-                onUploadProgress: (progressEvent: any) => {
-                    if (options.onProgress && progressEvent.total) {
-                        const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                        options.onProgress(progress);
-                    }
+
+
+        const method = options.method || 'POST';
+
+        const axiosConfig = {
+            method: method.toLowerCase() as any,
+            url,
+            data: formData,
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                ...options.headers
+            },
+            onUploadProgress: (progressEvent: any) => {
+                if (options.onProgress && progressEvent.total) {
+                    const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    options.onProgress(progress);
                 }
-            };
-            
-            const result = await axios(axiosConfig);
-            
-            return {
-                success: true,
-                data: result.data
-            };
-        } catch (error: any) {
-            return {
-                success: false,
-                error: error.response?.data?.message || error.message || 'Upload failed'
-            };
-        }
+            }
+        };        
+
+        return (await axios(axiosConfig)).data;
     }
 
     public pureGet = calls.pureGet;
@@ -150,15 +132,14 @@ class ApiService extends TheService {
         post: async <T, P extends object = object>(routeName: string, payload?: P, options?: IAPIOptions): Promise<T> => calls.post.bind(this)(backend.getBackendUrl.bind(this)(routeName, options?.routeParams, options?.queryParams), payload, options) as Promise<T>,
         put: async <T, P extends object = object>(routeName: string, payload: P, options?: IAPIOptions): Promise<T> => calls.put.bind(this)(backend.getBackendUrl.bind(this)(routeName, options?.routeParams, options?.queryParams), payload, options) as Promise<T>,
         delete: async <T>(routeName: string, options?: IAPIOptions): Promise<T> => calls.delete.bind(this)(backend.getBackendUrl.bind(this)(routeName, options?.routeParams, options?.queryParams), options) as Promise<T>,
-        uploadFile: async (routeName: string, files: Record<string, File>, payload: any = {}, uploadOptions: UploadFunctionOptions = this.defaultUploadOptions(), options: IAPIOptions = {}): Promise<UploadResponse> => this.uploadFile(backend.getBackendUrl.bind(this)(routeName, options?.routeParams), files, payload, uploadOptions),
+        uploadFiles: async <T = any, P = any>(routeName: string, files: Record<string, File>, payload: P = undefined, uploadOptions: UploadFunctionOptions = this.defaultUploadOptions(), options: IAPIOptions = {}): Promise<T> => this.uploadFiles<T, P>(backend.getBackendUrl.bind(this)(routeName, options?.routeParams), files, payload, uploadOptions),
     };
 
-    async getResource(resourceName: string): Promise<ITypesResponse>
-    {        
+    async getResource(resourceName: string): Promise<ITypesResponse> {
         return calls.get.bind(this)(`${this.config.get('backendUrl')}${this.config.get('apiPrefix') || ''}/api/rws/resource/${resourceName}`) as Promise<ITypesResponse>
     }
 
-    getBackendUrl: (routeName: string, params?: {[key: string]: string}, queryParams?: {[key: string]: string}) => string = backend.getBackendUrl.bind(this);
+    getBackendUrl: (routeName: string, params?: { [key: string]: string }, queryParams?: { [key: string]: string }) => string = backend.getBackendUrl.bind(this);
 }
 
 export default ApiService.getSingleton();
