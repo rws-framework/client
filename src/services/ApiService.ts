@@ -111,12 +111,15 @@ class ApiService extends TheService {
                 ...options.headers
             },
             onUploadProgress: (progressEvent: any) => {
+                console.log({progressEvent});
                 if (options.onProgress && progressEvent.total) {
                     const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
                     options.onProgress(progress);
                 }
             }
         };        
+
+        console.log({axiosConfig});
 
         return (await axios(axiosConfig)).data;
     }
