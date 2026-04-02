@@ -220,7 +220,9 @@ abstract class RWSViewComponent extends FoundationElement implements IRWSViewCom
             RWSViewComponent.FORCE_INJECT_MODE = mode;
         }
 
-        RWSViewComponent.FORCE_INJECT_STYLES = linkedStyles;
+        const existing = RWSViewComponent.FORCE_INJECT_STYLES ?? [];
+        const toAdd = linkedStyles.filter(l => !existing.includes(l));
+        RWSViewComponent.FORCE_INJECT_STYLES = [...existing, ...toAdd];
     }
 
     private applyFileList(): void {
