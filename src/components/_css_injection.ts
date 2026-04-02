@@ -21,6 +21,7 @@ interface ICSSInjectionComponent {
 export class CSSInjectionManager {
     private static CACHED_STYLES: Map<string, CSSStyleSheet> = new Map();
     private static STYLES_OWNER_COMPONENT: ICSSInjectionComponent | null = null;
+    private static LOADING_PROMISES: Map<string, Promise<CSSStyleSheet>> = new Map();
 
     static getCachedStyles(styleLinks: string[]): CSSStyleSheet[] {
         return styleLinks
@@ -39,6 +40,7 @@ export class CSSInjectionManager {
     static clearCachedStyles(): void {
         CSSInjectionManager.CACHED_STYLES.clear();
         CSSInjectionManager.STYLES_OWNER_COMPONENT = null;
+        CSSInjectionManager.LOADING_PROMISES.clear();
     }
 
     static async injectStyles(
@@ -135,25 +137,32 @@ export class CSSInjectionManager {
 
             for (const styleLink of uncachedLinks) {
                 const linkMode = Object.keys(RWSViewComponent.FORCE_INJECT_MODE_PER_LINK).includes(styleLink) ? RWSViewComponent.FORCE_INJECT_MODE_PER_LINK[styleLink] : mode;
-                
-                const loadPromise = new Promise<void>(async (resolve) => {
+
+                // If another component is already loading this style, wait for it instead of fetching again
+                if (CSSInjectionManager.LOADING_PROMISES.has(styleLink)) {
+                    const sheet = await CSSInjectionManager.LOADING_PROMISES.get(styleLink)!;
+                    adoptedSheets.push(sheet);
+                    doneAdded = true;
+                    continue;
+                }
+
+                const loadPromise = new Promise<CSSStyleSheet>(async (resolve, reject) => {
                     try {
                         if (linkMode === 'legacy') {
                             await CSSInjectionManager.injectLegacyStyle(component, styleLink, () => {
                                 doneAdded = true;
-                                resolve();
+                                resolve(null);
                             });
                         } else if (linkMode === 'style-element') {
                             await CSSInjectionManager.injectStyleElement(component, styleLink, db, storeName, maxAgeDays);
                             doneAdded = true;
-                            resolve();
+                            resolve(null);
                         } else if (linkMode === 'adopted') {
                             const sheet = await CSSInjectionManager.injectAdoptedStyle(component, styleLink, db, storeName, maxAgeDays);
                             adoptedSheets.push(sheet);
                             doneAdded = true;
-                            resolve();
+                            resolve(sheet);
                         } else if (linkMode === 'both') {
-                            // Handle both modes
                             const [sheet] = await Promise.all([
                                 CSSInjectionManager.injectAdoptedStyle(component, styleLink, db, storeName, maxAgeDays),
                                 new Promise<void>((resolveLegacy) => {
@@ -164,15 +173,23 @@ export class CSSInjectionManager {
                             ]);
                             adoptedSheets.push(sheet);
                             doneAdded = true;
-                            resolve();
+                            resolve(sheet);
                         }
                     } catch (error) {
                         console.error(`Failed to inject styles for ${styleLink}:`, error);
-                        resolve();
+                        reject(error);
                     }
                 });
 
-                await loadPromise;
+                CSSInjectionManager.LOADING_PROMISES.set(styleLink, loadPromise);
+
+                try {
+                    await loadPromise;
+                } catch {
+                    // already logged inside
+                } finally {
+                    CSSInjectionManager.LOADING_PROMISES.delete(styleLink);
+                }
             }
 
             doneAdded = true;
@@ -226,15 +243,35 @@ export class CSSInjectionManager {
         maxAgeDays: number
     ): Promise<CSSStyleSheet> {
         const cssText = await CSSInjectionManager.getCachedOrFetchCSS(component, styleLink, db, storeName, maxAgeDays);
-        
+                    
+        return CSSInjectionManager.injectAdoptedCSSText(cssText, styleLink);
+    }
+
+    static async injectAdoptedCSSText(cssText: string, styleName: string): Promise<CSSStyleSheet> {
         const sheet = new CSSStyleSheet();
         await sheet.replace(cssText);
         
         // Cache the stylesheet for future use
-        CSSInjectionManager.CACHED_STYLES.set(styleLink, sheet);
-        
+        CSSInjectionManager.CACHED_STYLES.set(styleName, sheet);
+
         return sheet;
     }
+
+    static async preloadCSSText(cssText: string, styleName: string): Promise<CSSStyleSheet> {
+        const sheet = await CSSInjectionManager.injectAdoptedCSSText(cssText, styleName);
+
+        const dbName = 'css-cache';
+        const storeName = 'styles';
+        const dbService = new IndexedDBServiceInstance();
+        const db = await dbService.openDB(dbName, storeName);
+        await dbService.saveToDB(db, storeName, styleName, {
+            css: cssText,
+            timestamp: Date.now()
+        });
+
+        return sheet;
+    }
+
 
     private static async getCachedOrFetchCSS(
         component: ICSSInjectionComponent,
@@ -268,7 +305,6 @@ export class CSSInjectionManager {
     private static setStylesOwner(component: ICSSInjectionComponent): void {
         if (!CSSInjectionManager.STYLES_OWNER_COMPONENT) {
             CSSInjectionManager.STYLES_OWNER_COMPONENT = component;
-            console.log({component});
         }
     }
 }

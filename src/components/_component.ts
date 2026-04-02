@@ -61,6 +61,7 @@ abstract class RWSViewComponent extends FoundationElement implements IRWSViewCom
     static FORCE_INJECT_STYLES?: string[] = [];
     static FORCE_INJECT_MODE?: CSSInjectMode = 'adopted';
     static FORCE_INJECT_MODE_PER_LINK?: Record<string, CSSInjectMode> = {};
+    static FORCE_PRELOADED_STYLES?: string[] = [];
 
     static _EVENTS = {
         component_define: 'rws:lifecycle:defineComponent',
@@ -94,8 +95,22 @@ abstract class RWSViewComponent extends FoundationElement implements IRWSViewCom
 
         this.applyFileList();
 
-        if (RWSViewComponent.FORCE_INJECT_STYLES && RWSViewComponent.FORCE_INJECT_STYLES.length > 0) {
-            this.injectStyles(RWSViewComponent.FORCE_INJECT_STYLES, RWSViewComponent.FORCE_INJECT_MODE);
+        const rwsStyleLinks = (window as any).RWS?.styleLinks as Set<string> | undefined;
+        if (rwsStyleLinks) {
+            for (const link of rwsStyleLinks) {
+                if (!(RWSViewComponent.FORCE_INJECT_STYLES ?? []).includes(link)) {
+                    RWSViewComponent.FORCE_INJECT_STYLES = [...(RWSViewComponent.FORCE_INJECT_STYLES ?? []), link];
+                }
+            }
+        }
+
+        const toInject = [
+            ...(RWSViewComponent.FORCE_INJECT_STYLES ?? []),
+            ...(RWSViewComponent.FORCE_PRELOADED_STYLES ?? [])
+        ];
+
+        if (toInject.length > 0) {
+            this.injectStyles(toInject, RWSViewComponent.FORCE_INJECT_MODE);
         }
 
         RWSViewComponent.instances.push(this);
@@ -287,6 +302,37 @@ abstract class RWSViewComponent extends FoundationElement implements IRWSViewCom
 
     protected hasInjectedStyles(styleLinks: string[]): boolean {
         return CSSInjectionManager.hasCachedStyles(styleLinks);
+    }
+
+    static injectAdoptedCSSText(cssText: string, styleName: string) {
+        return CSSInjectionManager.injectAdoptedCSSText(cssText, styleName);
+    }
+
+    static async preloadCSSText(cssText: string, styleName: string) {
+        RWSViewComponent.FORCE_PRELOADED_STYLES = [...(RWSViewComponent.FORCE_PRELOADED_STYLES ?? []), styleName];
+        return CSSInjectionManager.preloadCSSText(cssText, styleName);
+    }
+
+    /**
+     * Register link URL(s) to be injected into this component AND all future child components.
+     * Call from outside on the element instance: `element.addLinkedStyles([...])`
+     */
+    async addLinkedStyles(styleLinks: string[], mode?: CSSInjectMode): Promise<void> {
+        RWSViewComponent.injectStyles([
+            ...(RWSViewComponent.FORCE_INJECT_STYLES ?? []),
+            ...styleLinks
+        ], mode);
+        await this.injectStyles(styleLinks, mode ?? RWSViewComponent.FORCE_INJECT_MODE);
+    }
+
+    /**
+     * Preload a CSS text string, cache it under `styleName`, and inject into this component.
+     * All future child components will also receive it via FORCE_PRELOADED_STYLES.
+     * Call from outside on the element instance: `element.addPreloadedCSS(cssText, 'my-key')`
+     */
+    async addPreloadedCSS(cssText: string, styleName: string): Promise<void> {
+        await RWSViewComponent.preloadCSSText(cssText, styleName);
+        await this.injectStyles([styleName], RWSViewComponent.FORCE_INJECT_MODE);
     }
 }
 

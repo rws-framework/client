@@ -18,10 +18,12 @@ async function loadAliases(packageDir, tsConfig, nodeModulesPath, executionDir){
     for(const pkgName of packageNames){
         const symlinkPath = path.join(nodeModulesPath, '@rws-framework', pkgName);
 
-        const targetPath = await fs.promises.realpath(symlinkPath);                
-                
-        tsPaths['@rws-framework/' + pkgName + '/*'] = targetPath + '/*';
-        tsPaths['@rws-framework/' + pkgName] = targetPath + '/src/index.ts';
+        if(fs.existsSync(symlinkPath)){           
+            const targetPath = await fs.promises.realpath(symlinkPath);                
+                     
+            tsPaths['@rws-framework/' + pkgName + '/*'] = targetPath + '/*';
+            tsPaths['@rws-framework/' + pkgName] = targetPath + '/src/index.ts';
+        }
     }
 
     return {        
