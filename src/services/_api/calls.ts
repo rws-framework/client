@@ -15,15 +15,19 @@ export const calls = {
         }
     },
 
-    getHeaders(token: string | null = null, optHeaders: HeadersInit = {}): HeadersInit {
+    getHeaders(service: ApiServiceInstance, optHeaders: HeadersInit = {}): HeadersInit {
         const headers: Record<string, string> = { ...(optHeaders as Record<string, string>) };
 
         if (!('Content-Type' in headers)) {
             this.addHeader(headers, 'Content-Type', _DEFAULT_CONTENT_TYPE);
         }
 
-        if (token) {
-            this.addHeader(headers, 'Authorization', `Bearer ${token}`);
+        if (service.token) {
+            this.addHeader(headers, 'Authorization', `Bearer ${service.token}`);
+        }
+
+         if (service.apiKey) {
+            this.addHeader(headers, 'x-api-key', `${service.apiKey}`);
         }
 
         if (headers['Content-Type']) {
@@ -38,7 +42,7 @@ export const calls = {
     async pureGet(this: ApiServiceInstance, url: string, options: IAPIOptions = {}): Promise<string> {
         try {
             const response = await fetch(url, {
-                headers: calls.getHeaders(this.token, options.headers),
+                headers: calls.getHeaders(this, options.headers),
             });
             return await response.text();
         } catch (error) {
@@ -50,7 +54,7 @@ export const calls = {
     async get<T>(this: ApiServiceInstance, url: string, options: IAPIOptions = {}): Promise<T> {
         try {
             const response = await fetch(url, {
-                headers: calls.getHeaders(this.token, options.headers),
+                headers: calls.getHeaders(this, options.headers),
             });
             const data: T = await response.json();
             return data;
@@ -69,7 +73,7 @@ export const calls = {
         try {
             const response = await fetch(url, {
                 method: 'POST',
-                headers: calls.getHeaders(this.token, options.headers),
+                headers: calls.getHeaders(this, options.headers),
                 body: payload ? JSON.stringify(payload) : null,
             });
             const data: T = await response.json();
@@ -89,7 +93,7 @@ export const calls = {
         try {
             const response = await fetch(url, {
                 method: 'PUT',
-                headers: calls.getHeaders(this.token, options.headers),
+                headers: calls.getHeaders(this, options.headers),
                 body: JSON.stringify(payload),
             });
             const data: T = await response.json();
@@ -104,7 +108,7 @@ export const calls = {
         try {
             const response = await fetch(url, {
                 method: 'DELETE',
-                headers: calls.getHeaders(this.token, options.headers),
+                headers: calls.getHeaders(this, options.headers),
             });
             const data: T = await response.json();
             return data;
