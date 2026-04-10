@@ -52,9 +52,10 @@ interface UploadFunctionOptions {
 class ApiService extends TheService {
     static _DEFAULT: boolean = true;
     public token?: string;
+    public apiKey?: string;
 
     private defaultUploadOptions: () => UploadFunctionOptions = () => ({
-        headers: this.token ? { Authorization: `Bearer ${this.token}` } : {},
+        headers: this.getAuthHeaders(),
         method: 'POST' as const,
         onProgress: (progress: number) => null,
     });
@@ -63,11 +64,24 @@ class ApiService extends TheService {
         super();
     }
 
+    private getAuthHeaders(): Record<string, string> {
+        const headers: Record<string, string> = {};
+        if (this.token) {
+            headers['Authorization'] = `Bearer ${this.token}`;
+        }
+        if (this.apiKey) {
+            headers['x-api-key'] = this.apiKey;
+        }
+        return headers;
+    }
+
     public setToken(token: string) {
         this.token = token;
     }
 
-
+    public setApiKey(apiKey: string) {
+        this.apiKey = apiKey;
+    }
 
     public async isGetTargetReachable(url: string, options: IAPIOptions = {}): Promise<boolean> {
         try {
