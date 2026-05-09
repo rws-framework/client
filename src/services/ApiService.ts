@@ -1,4 +1,3 @@
-import { ITypesResponse } from '../../../components/src/types/IBackendCore';
 import TheService from './_service';
 import axios from 'axios';
 
@@ -152,7 +151,7 @@ class ApiService extends TheService {
         uploadFiles: async <T = any, P = any>(routeName: string, files: Record<string, File>, payload: P = undefined, uploadOptions: UploadFunctionOptions = this.defaultUploadOptions(), options: IAPIOptions = {}): Promise<T> => this.uploadFiles<T, P>(backend.getBackendUrl.bind(this)(routeName, options?.routeParams), files, payload, uploadOptions),
     };
 
-    async getResource(resourceName: string): Promise<ITypesResponse> {
+    async getResource(resourceName: string): Promise<any> {
         return calls.get.bind(this)(`${this.config.get('backendUrl')}${this.config.get('apiPrefix') || ''}/api/rws/resource/${resourceName}`) as Promise<ITypesResponse>
     }
 
