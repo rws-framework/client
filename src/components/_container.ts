@@ -1,4 +1,5 @@
-import {DI, Container, Registration, InterfaceSymbol, Key } from '../../foundation/rws-foundation';
+import {DI, Container, Registration } from '../../foundation/rws-foundation';
+import type { InterfaceSymbol, Key } from '@microsoft/fast-foundation/dist/esm/di/di';
 import {loadRWSRichWindow} from '../types/RWSWindow';
 
 export default () => {
@@ -13,4 +14,5 @@ export default () => {
     return richWindow.RWS.container;
 };
 
-export { DI, Container, Registration, InterfaceSymbol, Key }
+export { DI, Container, Registration }
+export type { InterfaceSymbol, Key }

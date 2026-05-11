@@ -1,6 +1,7 @@
 import { ApiServiceInstance, IAPIOptions } from "../ApiService";
 
 const _DEFAULT_CONTENT_TYPE = 'application/json';
+const RWS_AUTH_EXPIRED_EVENT = 'rws:auth:expired';
 
 type HeadersType = Headers | [string, string][] | Record<string, string>;
 
@@ -39,11 +40,18 @@ export const calls = {
         return headers;
     },
 
+    handleUnauthorized(response: Response): void {
+        if (response.status === 401) {
+            window.dispatchEvent(new CustomEvent(RWS_AUTH_EXPIRED_EVENT));
+        }
+    },
+
     async pureGet(this: ApiServiceInstance, url: string, options: IAPIOptions = {}): Promise<string> {
         try {
             const response = await fetch(url, {
                 headers: calls.getHeaders(this, options.headers),
             });
+            calls.handleUnauthorized(response);
             return await response.text();
         } catch (error) {
             console.error('GET request failed:', error);
@@ -56,6 +64,7 @@ export const calls = {
             const response = await fetch(url, {
                 headers: calls.getHeaders(this, options.headers),
             });
+            calls.handleUnauthorized(response);
             const data: T = await response.json();
             return data;
         } catch (error) {
@@ -76,6 +85,7 @@ export const calls = {
                 headers: calls.getHeaders(this, options.headers),
                 body: payload ? JSON.stringify(payload) : null,
             });
+            calls.handleUnauthorized(response);
             const data: T = await response.json();
             return data;
         } catch (error) {
@@ -96,6 +106,7 @@ export const calls = {
                 headers: calls.getHeaders(this, options.headers),
                 body: JSON.stringify(payload),
             });
+            calls.handleUnauthorized(response);
             const data: T = await response.json();
             return data;
         } catch (error) {
@@ -110,6 +121,7 @@ export const calls = {
                 method: 'DELETE',
                 headers: calls.getHeaders(this, options.headers),
             });
+            calls.handleUnauthorized(response);
             const data: T = await response.json();
             return data;
         } catch (error) {

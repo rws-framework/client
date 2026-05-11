@@ -1,8 +1,6 @@
 import IRWSUser from '../../src/types/IRWSUser';
-import RWSContainer from '../../src/components/_container';
+import getSWContainer, { Container } from './_sw_container';
 
-//@4DI
-import { Container } from '../../src/components/_container';
 
 type SWMsgType = {
     command: string,
@@ -25,7 +23,7 @@ abstract class RWSServiceWorker<UserType extends IRWSUser> {
     onInstall(): Promise<void> { return; }
     onActivate(): Promise<void> { return; }
 
-    constructor(workerScope: ServiceWorkerGlobalScope, DI: Container){   
+    constructor(workerScope: ServiceWorkerGlobalScope, DI: SWContainer){   
         this.DI = DI;             
         this.workerScope = workerScope;
 
@@ -72,7 +70,7 @@ abstract class RWSServiceWorker<UserType extends IRWSUser> {
         const className = this.name;
 
         if (!RWSServiceWorker._instances[className]) {            
-            RWSServiceWorker._instances[className] = new this(workerScope, RWSContainer());
+            RWSServiceWorker._instances[className] = new this(workerScope, getSWContainer());
         }
 
         return RWSServiceWorker._instances[className] as InstanceType<T>;

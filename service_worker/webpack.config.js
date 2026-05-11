@@ -2,7 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 const tools = require('@rws-framework/client/_tools');
 const gThis = require.resolve('globalthis')
-const {rwsExternals} = require('@rws-framework/client/_rws_externals');
+const {rwsExternals} = require(path.resolve(tools.findPackageDir(), 'cfg', 'build_steps', 'webpack', '_rws_externals'));
 
 
 const executionDir = process.cwd();
@@ -30,6 +30,7 @@ module.exports = {
       document: false,
       globalThis:  gThis,
       '@cwd' : process.cwd(),
+      '@microsoft/fast-element': path.resolve(__dirname, 'src', '_fast_element_sw_shim.js'),
       // '@rws-framework/client': path.resolve(__dirname, '..') + '/index.ts',
       // '@rws-framework/client/*': path.resolve(__dirname, '..', '..')
     }
@@ -51,11 +52,12 @@ module.exports = {
             loader: 'ts-loader',
             options: {
               allowTsInNodeModules: true,
+              transpileOnly: true,
               configFile: path.resolve(__dirname, 'tsconfig.json')            
             }
           },
           {
-            loader: path.resolve(tools.findPackageDir(),'webpack','rws_fast_ts_loader.js'),        
+            loader: path.resolve(tools.findPackageDir(),'builder','webpack','loaders','rws_fast_ts_loader.js'),        
           }  
         ]         
       }
