@@ -1,24 +1,14 @@
 const path = require('path');
 const webpack = require('webpack');
 const tools = require('@rws-framework/client/_tools');
-const gThis = require.resolve('globalthis')
-const {rwsExternals} = require(path.resolve(tools.findPackageDir(), 'cfg', 'build_steps', 'webpack', '_rws_externals'));
-
 
 const executionDir = process.cwd();
 const rootPackageNodeModules = path.resolve(tools.findRootWorkspacePath(process.cwd()), 'node_modules');
 
-const mergeCodeBaseOptions = {
-  incl: ['@rws-framework/client/src/services'],
-  not_incl: ['./services/RoutingService'],
-  exceptions_context: ['socket.io-', '@socket.io'],
-  exceptions: ['@rws-framework/client/src/services', './service', './ws_handlers', 'socket.io-', '@socket.io','uuid',]
-};
-
 module.exports = {
   entry: process.env.SWPATH,
   mode: 'development',
-  target: 'web',
+  target: 'webworker',
   devtool: 'source-map',
   output: {
     path: path.resolve(executionDir, 'public'),
@@ -26,19 +16,8 @@ module.exports = {
   },
   resolve: {
     extensions: ['.ts', '.js'],
-    alias: {
-      document: false,
-      globalThis:  gThis,
-      '@cwd' : process.cwd(),
-      '@microsoft/fast-element': path.resolve(__dirname, 'src', '_fast_element_sw_shim.js'),
-      // '@rws-framework/client': path.resolve(__dirname, '..') + '/index.ts',
-      // '@rws-framework/client/*': path.resolve(__dirname, '..', '..')
-    }
   },
   plugins: [
-    new webpack.ProvidePlugin({
-      global: 'globalThis' // Use 'globalThis' as a fallback for the global object
-    }),
     new webpack.DefinePlugin({
       '__SWPATH': "'" + process.env.SWPATH + "'",
     }),
@@ -56,9 +35,6 @@ module.exports = {
               configFile: path.resolve(__dirname, 'tsconfig.json')            
             }
           },
-          {
-            loader: path.resolve(tools.findPackageDir(),'builder','webpack','loaders','rws_fast_ts_loader.js'),        
-          }  
         ]         
       }
     ],
