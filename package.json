@@ -1,7 +1,7 @@
 {
     "name": "@rws-framework/client",
     "private": false,
-    "version": "2.29.2",
+    "version": "2.29.3",
     "main": "src/index.ts",
     "scripts": {
         "docs": "typedoc --tsconfig ./tsconfig.json"
@@ -90,7 +90,7 @@
         "typedoc-plugin-not-exported": "^0.1.6",
         "typedoc-plugin-rename-defaults": "^0.7.0",
         "typedoc-theme-hierarchy": "^4.1.2",
-        "typescript": "^6.0.4",
+        "typescript": "6.0.3",
         "uglify-js": "^3.17.4",
         "url-loader": "^4.1.1",
         "vite": "^6.0.11",
