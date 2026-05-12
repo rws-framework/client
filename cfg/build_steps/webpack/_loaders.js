@@ -53,6 +53,7 @@ function getRWSLoaders(packageDir, executionDir, tsConfigData, appRootDir, entry
           options: {
             configFile: tsConfigPath, 
             compilerOptions: {
+                ignoreDeprecations: '6.0',
                 emitDecoratorMetadata: true,
                 experimentalDecorators: true,
                 target: "ES2018",
