@@ -36,7 +36,10 @@ module.exports = {
             options: {
               allowTsInNodeModules: true,
               transpileOnly: true,
-              configFile: tsConfigFile            
+              configFile: tsConfigFile,
+              compilerOptions: {
+                ignoreDeprecations: '6.0'
+              }
             }
           },
         ]         
