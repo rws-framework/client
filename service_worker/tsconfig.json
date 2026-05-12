@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+      "ignoreDeprecations": "6.0",
       "baseUrl": "./",
       "experimentalDecorators": true,
       "emitDecoratorMetadata": true,
@@ -10,12 +11,16 @@
       "esModuleInterop": true,
       "sourceMap": true,
       "outDir": "dist",
+      "rootDir": "..",
       "strictNullChecks": false,    
       "allowSyntheticDefaultImports": true,  
       "lib": ["DOM", "ESNext", "WebWorker"],  
       "paths": {        
         //  "@rws-framework/client/*": ["../*"],      
         //  "@rws-framework/client": ["../index"],      
-      }       
-    }
+      }            
+    },
+    "include": [
+      "../src/types/IRWSUser.ts"
+    ]
   }

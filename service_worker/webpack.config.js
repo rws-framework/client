@@ -5,6 +5,10 @@ const tools = require('@rws-framework/client/_tools');
 const executionDir = process.cwd();
 const rootPackageNodeModules = path.resolve(tools.findRootWorkspacePath(process.cwd()), 'node_modules');
 
+const tsConfigFile = process.env.SW_TSCONFIG 
+  ? path.resolve(process.env.SW_TSCONFIG) 
+  : path.resolve(__dirname, 'tsconfig.json');
+
 module.exports = {
   entry: process.env.SWPATH,
   mode: 'development',
@@ -32,7 +36,7 @@ module.exports = {
             options: {
               allowTsInNodeModules: true,
               transpileOnly: true,
-              configFile: path.resolve(__dirname, 'tsconfig.json')            
+              configFile: tsConfigFile            
             }
           },
         ]         

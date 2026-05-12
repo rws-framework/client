@@ -1,6 +1,9 @@
 import RWSService from './_service';
 
-
+export interface ISWOpts {
+    scope?: string;
+    fileName?: string;
+}
 class ServiceWorkerService extends RWSService {   
     static _DEFAULT: boolean = true;
     async registerServiceWorker(): Promise<void>
@@ -8,7 +11,7 @@ class ServiceWorkerService extends RWSService {
         await ServiceWorkerService.registerServiceWorker();
     }
 
-    static registerServiceWorker(): Promise<void>
+    static registerServiceWorker(options ?: ISWOpts): Promise<void>
     {
         if ('serviceWorker' in navigator) 
         {
@@ -19,9 +22,9 @@ class ServiceWorkerService extends RWSService {
 
                 try {
                     return (navigator.serviceWorker.register(
-                        '/service_worker.js',
+                        options?.fileName || '/service_worker.js',
                         {
-                            scope: '/'          
+                            scope: options?.scope || '/'          
                         }
                     ).then((registration) => {
                         if (registration.installing) {
@@ -53,6 +56,30 @@ class ServiceWorkerService extends RWSService {
         } else {
             throw new Error('Service worker is not available');
         }
+    }
+
+    onMessage(type: string, handler: (data: any) => void): () => void
+    {
+        const listener = (event: MessageEvent) => {
+            if (event.data && event.data.command === type) {
+                handler(event.data);
+            }
+        };
+
+        navigator.serviceWorker.addEventListener('message', listener);
+
+        return () => {
+            navigator.serviceWorker.removeEventListener('message', listener);
+        };
+    }
+
+    onAnyMessage(handler: (event: MessageEvent) => void): () => void
+    {
+        navigator.serviceWorker.addEventListener('message', handler);
+
+        return () => {
+            navigator.serviceWorker.removeEventListener('message', handler);
+        };
     }
 }
 
