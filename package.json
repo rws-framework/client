@@ -1,7 +1,7 @@
 {
     "name": "@rws-framework/client",
     "private": false,
-    "version": "2.29.3",
+    "version": "2.29.4",
     "main": "src/index.ts",
     "scripts": {
         "docs": "typedoc --tsconfig ./tsconfig.json"
@@ -41,6 +41,7 @@
         "reflect-metadata": "^0.2.2",
         "resolve-url-loader": "^5.0.0",
         "socket.io-client": "^4.7.2",
+        "ts-loader": "^9.4.4",
         "url-router": "^13.0.0",
         "uuid": "^9.0.1",
         "v4": "^0.0.1",
@@ -78,7 +79,6 @@
         "style-loader": "^3.3.3",
         "terser-webpack-plugin": "^5.3.9",
         "thread-loader": "^4.0.4",
-        "ts-loader": "^9.4.4",
         "ts-node": "^10.9.1",
         "ts-transformer-keys": "^0.4.4",
         "tsc-watch": "^6.0.4",
