@@ -60,7 +60,7 @@ function getRWSLoaders(packageDir, executionDir, tsConfigData, appRootDir, entry
                 module: "commonjs"
             },                        
             allowTsInNodeModules: true,
-            reportFiles: true,
+            // reportFiles: true,
             logLevel: "info",
             logInfoToStdOut: true,
             context: executionDir,
